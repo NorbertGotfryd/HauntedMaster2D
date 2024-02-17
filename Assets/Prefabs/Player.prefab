@@ -216,11 +216,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eb90188c5c4095439d666d69617ffc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterElement: 0
   healhAmountMax: 100
   attackAmount: 15
   defAmount: 5
   moveToTargetSpeed: 5
-  startingPosition: {x: 0, y: 0}
+  startingPosition: {x: 0, y: 0, z: 0}
 --- !u!61 &3053114339561406503
 BoxCollider2D:
   m_ObjectHideFlags: 0

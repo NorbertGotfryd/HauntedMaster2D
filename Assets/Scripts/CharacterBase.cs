@@ -7,20 +7,24 @@ using UnityEngine;
 public abstract class CharacterBase : MonoBehaviour
 {
     [Header("Base Stats")]
+    [SerializeField] protected CharacterElement characterElement;
     [SerializeField] protected int healhAmountMax;
     [SerializeField] protected int attackAmount;
     [SerializeField] protected int defAmount;
-    [SerializeField] protected float moveToTargetSpeed;
+    [SerializeField] protected int initiativeAmountMax;
+    [SerializeField] protected int moveToTargetSpeed;
 
     private bool isPlayerTeam;
     protected int healhAmountCurrent;
+    protected int initiativehAmountCurrent;
     protected float stopDistanceToTargetPosition = 1f;
 
-    public Vector2 startingPosition; //na protected zmienic
-    protected Vector2 moveToPosition;
-    protected Vector2 currentPosition;
+    public Vector3 startingPosition; //protected
+    protected Vector3 moveToPosition;
 
     protected CharacterState state;
+    protected CharacterElement attackerElement;
+    protected CharacterElement defenderElement;
 
     protected GameObject selectionVisual;
     protected AnimationSystem animationSystem;
@@ -43,9 +47,18 @@ public abstract class CharacterBase : MonoBehaviour
         Busy,
     }
 
+    public enum CharacterElement
+    {
+        Neutral,
+        Fire,
+        Water,
+        Wind,
+    }
+
     private void Awake()
     {
         animationSystem = FindObjectOfType<AnimationSystem>();
+
         healhAmountCurrent = healhAmountMax;
 
         selectionVisual = transform.Find("SelectionVisual").gameObject;
@@ -55,24 +68,22 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Start()
     {
-        startingPosition = GetCharacterPosition(); //dziala ale bez sensu
+        startingPosition = transform.position;
     }
 
     private void Update()
     {
-        currentPosition = GetCharacterPosition();// new Vector2(transform.position.x, transform.position.y); //test
-
-        CharacterBattleState(); //to powinno byc na eventach
+        CharacterBattleState(); //to musi byc na eventach w przyszlosi
     }
 
     //zainicjalizowanie postaci na polu walki
-    //beda tu takie rzeczy jak pozycja, typ, druzyna i statystyki
-    public void SetupCharacter(Vector2 startingPosition)
+    //beda tu takie rzeczy jak pozycja, typ, druzyna etc
+    public void SetupCharacter(Vector3 startingPosition)
     {
 
     }
 
-    //ustawienie statusu postaci, trzeba to troche przerobic
+    //ustawienie statusu postaci
     private void CharacterBattleState()
     {
         switch (state)
@@ -80,30 +91,21 @@ public abstract class CharacterBase : MonoBehaviour
             case CharacterState.Idle:
                 break;
             case CharacterState.MoveToTargetAndAttack:
-                if (Vector2.Distance(moveToPosition, GetCharacterPosition()) >= stopDistanceToTargetPosition)
+                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
                 {
-                    currentPosition += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
+                    transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
                 else //dotarcie do docelowej pozycji
                 {
+                    onAttackHit();
                     state = CharacterState.AttackTarget;
-                    //animationSystem.AnimationAttack(); //jakims cudem blokuje akcje dalej, trzeba w animatorze pogrzebac
                     onAttackComplete();
-
-                    /* chyba cos takiego powinno byc, do sprawdzenia jak reszta bedzie dzialac
-                        animationSystem.AnimationAttack(()=>
-                        {
-                        AnimationIdleEnable();
-                        onAttackComplete();
-                        });
-                    */
-
                 }
                 break;
             case CharacterState.MoveToPosition:
-                if (Vector2.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
+                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
                 {
-                    currentPosition += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
+                    transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
                 else //dotarcie do docelowej pozycji
                 {
@@ -115,16 +117,16 @@ public abstract class CharacterBase : MonoBehaviour
                 break;
             case CharacterState.AttackTarget:
                 break;
-            case CharacterState.MoveToStartPosition: //?
-                if (Vector2.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
+            case CharacterState.MoveToStartPosition:
+                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
                 {
-                    currentPosition += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
+                    transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
                 else
                 {
-                    //funkcja animacji spoczynku (idle)
+                    //animacji spoczynku (idle)
                     state = CharacterState.Idle;
-                    //onMoveComplete();
+                    onMoveComplete();
                 }
                 break;
             case CharacterState.Busy:
@@ -133,47 +135,90 @@ public abstract class CharacterBase : MonoBehaviour
     }
 
     //doskok z atakiem
-    public void CharacterAttack(Vector2 targetPosition, Action onAttackHit, Action onAttackComplete)
+    public void CharacterAttack(Vector3 targetPosition, Action onAttackHit, Action onAttackComplete)
     {
         this.onAttackHit = onAttackHit;
         this.onAttackComplete = onAttackComplete;
         moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized * moveToTargetSpeed;
-        //animacja doskoku do celu lub przygotowania do ataku, w sumie cokolwiek
+        //animacja doskoku do celu lub przygotowania do ataku
         state = CharacterState.MoveToTargetAndAttack;
     }
 
-    //doskok
-    public void MoveToTargetPosition(Vector2 targetPosition, Action onMoveComplete)
+    //dotarcie do celu, bedzie uzywane do wszystkiego innego co wymaga przemieszczenia postaci poza atakiem
+    public void MoveToTargetPosition(Vector3 targetPosition, Action onMoveComplete)
     {
-        moveToPosition = targetPosition;
         this.onMoveComplete = onMoveComplete;
+        moveToPosition = targetPosition;
         //animacja doskoku do przeciwnika
         state = CharacterState.MoveToPosition;
     }
 
     //powrot do oryginalnej pozycji
-    public void BackToStartPosition(Vector2 startingPosition)//Action onMoveComplete)
+    public void BackToStartPosition(Action onMoveComplete)
     {
-        //this.onMoveComplete = onMoveComplete;
-        this.startingPosition = startingPosition; //?
-        moveToPosition = startingPosition; //?
+        this.onMoveComplete = onMoveComplete;
+        moveToPosition = startingPosition;
         //animacja powrotu
         state = CharacterState.MoveToStartPosition;
     }
 
-    //funkcja obliczajaca przyjete obrazenia przez postac
-    public int DamageDealth(int attAmount, int protAmount)
+    //funkcja okreslajaca przeliczniki obrazen miedzy zywiolami
+    public float DamageMultiplier(string attackerElement, string defenderElement)
     {
-        int damageDeal = UnityEngine.Random.Range(1, attAmount) - (0);
+        Dictionary<string, float> attackValues = new Dictionary<string, float>()
+        {
+            //Neutralny
+            {"NeutralFire", 1f},
+            {"NeutralEarth", 1f},
+            {"NeutralWind", 1f},
+            {"NeutralWater", 1f},
+            {"NeutralNeutral", 1f},
+            //Ogien koniunkcja
+            {"FireNeutral", 1f},
+            {"FireFire", 1f},
+            {"FireWater", 1.5f},
+            {"FireEarth", 2f},
+            {"FireWind", 0.5f},
+            //Ziemia koniunkcja
+            {"EarthNeutral", 1f},
+            {"EarthEarth", 1f},
+            {"EarthFire", 0.5f},
+            {"EarthWater", 2f},
+            {"EarthWind", 1.5f},
+            //Woda koniunkcja
+            {"WaterNeutral", 1f},
+            {"WaterWater", 1f},
+            {"WaterFire", 1.5f},
+            {"WaterEarth", 0.5f},
+            {"WaterWind", 2f},
+            //Wiatr koniunkcja
+            {"WindNeutral", 1f},
+            {"WindWind", 1f},
+            {"WindFire", 2f},
+            {"WindEarth", 1.5f},
+            {"WindWater", 0.5f},
+        };
+        string toDict = attackerElement + defenderElement;
+        float atkMultiplier = attackValues[toDict];
 
-        return damageDeal;
+        return atkMultiplier;
     }
 
-    //obliczanie zycia postaci i co sie z nia dzieje
-    //to wywolywac do zadawania obrazen
+    //funkcja obliczajaca przyjete obrazenia przez postac
+    public int Damage(int attackAmount, int defAmount)//, float multiplier)
+    {
+        //do obliczen trzeba dodac defAmount
+        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * 0.8f, attackAmount * 1.2f) * (DamageMultiplier("Wind", "Water")));
+
+        return damageAmount;
+    }
+
+    //obliczanie pozostalego HP postaci i sprawdza czy posatc zginela
+    //Wywolywac do zadawania obrazen postaciom
     public void HealthDamageCalculation()
     {
-        healhAmountCurrent -= DamageDealth(attackAmount, defAmount);
+        //trzeba postawic tutaj staty przeciwnika bo bierze atakowanego
+        healhAmountCurrent -= Damage(attackAmount, defAmount);
         if (healhAmountCurrent < 0)
             healhAmountCurrent = 0;
 
@@ -186,7 +231,7 @@ public abstract class CharacterBase : MonoBehaviour
         Debug.Log(gameObject.name + " HP left: " + healhAmountCurrent);
     }
 
-    //smierc postaci
+    //zabicie postaci
     public void CharacterDie()
     {
         if (OnDeath != null)
@@ -208,6 +253,6 @@ public abstract class CharacterBase : MonoBehaviour
     //sprawdzenie czy postac jest martwa
     public bool CharacterIsDead() => healhAmountCurrent <= 0;
 
-    //funkcja do zwrocenia pozycji postaci
-    public Vector2 GetCharacterPosition() => new Vector2(transform.position.x, transform.position.y);
+    //zwrocenie pozycji postaci
+    public Vector3 GetCharacterPosition() => transform.position;
 }

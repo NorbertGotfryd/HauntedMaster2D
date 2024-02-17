@@ -10,8 +10,10 @@ public class BattleHandler : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
 
-    [SerializeField] private Vector2 playerPos;
-    [SerializeField] private Vector2 enemyPos;
+    [SerializeField] private Vector3 playerPos;
+    [SerializeField] private Vector3 enemyPos;
+
+    private BattleState battleState;
 
     private List<CharacterBase> characterList;
     private CharacterBase selectedTargetCharacter;
@@ -19,7 +21,6 @@ public class BattleHandler : MonoBehaviour
 
     private CharacterBase playerCharacter; //w przyszlosci do usuniecia
     private CharacterBase enemyCharacter; //w przyszlosci do usuniecia
-    private BattleState battleState;
 
     //status walki
     private enum BattleState
@@ -28,13 +29,13 @@ public class BattleHandler : MonoBehaviour
         Busy,
     }
 
+    //pozycja postaci na polu walki
     public enum CharacterLanePosition
     {
-        Top,
-        Up,
-        Middle,
-        Down,
-        Bottom,
+        Active,
+        TopInactive,
+        MiddleInactive,
+        BottomInactive,
     }
 
     private void Awake()
@@ -60,55 +61,40 @@ public class BattleHandler : MonoBehaviour
 
     private void Update()
     {
+        //jak wszystko zacznie dzialac przeniesc do osobnej funkcji
         switch (battleState)
         {
             case BattleState.WaitingForPlayer:
                 //tura gracza
-
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     // Attack
                     battleState = BattleState.Busy;
-                    playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(), () =>
+                    playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(),
+                       () =>
                     {
-                        //dlaczego to sie nie odpala?
+                        enemyCharacter.HealthDamageCalculation();
                         Debug.Log("player.onAttackHit");
-                        //animacja ataku
-                    }, () =>
+                    },
+                       () =>
                     {
                         Debug.Log("player.onAttackComplete");
-                        //playerCharacter.HealthDamageCalculation();
-                        playerCharacter.BackToStartPosition(playerCharacter.startingPosition);
+                        playerCharacter.BackToStartPosition(() => Debug.Log("BackToStartPosition"));
                         ChooseActiveCharacterBattle();
                         SetActiveCharacterBattle(enemyCharacter);
+
                     });
                 }
-
-                /*
-                //testowa funkcja, przy nacisnieciu spacji postac gracza atakuje
-                if(state == BattleState.WaitingForPlayer)
-                {
-                    if (Input.GetKeyDown(KeyCode.Space))
-                    {
-                        state = BattleState.Busy;
-                        playerCharacterBattle.CharacterAttack(enemyCharacterBattle, () =>
-                        {
-                            ChooseActiveCharacterBattle();
-                        });
-                    }
-                }
-                */
                 break;
             case BattleState.Busy:
                 break;
         }
     }
 
-
-    //spawn postaci, do przerobienia zeby lepiej rozpoznawalo kogo ma spawnowac i gdzie
+    //spawn postaci
     private CharacterBase SpawnCharacter(bool isPlayer)
     {
-        Vector2 position;
+        Vector3 position;
         GameObject character;
         if (isPlayer)
         {
@@ -127,23 +113,15 @@ public class BattleHandler : MonoBehaviour
         return characterBattle;
     }
 
-    //logika znacznika aktywnej postaci
-    private void SetActiveCharacterBattle(CharacterBase characterBattle)
-    {
-        if (activeCharacter != null)
-            activeCharacter.HideSelection();
-
-        activeCharacter = characterBattle;
-        activeCharacter.ShowSelection();
-    }
-
-    //ustawienie aktywnej postaci, na razie jest to mega prymitywne bo albo rusza sie gracz albo przeciwnik
-    //w przyszlosci bedzie to lista
+    //ustawienie aktywnej postaci
+    //przerobic to na liste
     private void ChooseActiveCharacterBattle()
     {
+        //sprawdzenie czy walka nadal trwa
         if (TestBattleOver())
             return;
 
+        //ustawienie aktywnej postaci
         if (activeCharacter == playerCharacter)
         {
             SetActiveCharacterBattle(enemyCharacter);
@@ -154,22 +132,14 @@ public class BattleHandler : MonoBehaviour
             () =>
             {
                 Debug.Log("enemy.onAttackHit");
+                playerCharacter.HealthDamageCalculation();
             },
             () =>
             {
                 Debug.Log("enemy.onAttackComplete");
-                //enemyCharacter.HealthDamageCalculation();
-                enemyCharacter.BackToStartPosition(enemyCharacter.startingPosition);
+                enemyCharacter.BackToStartPosition(() => Debug.Log("BackToStartPosition"));
                 ChooseActiveCharacterBattle();
             });
-
-
-            /*
-            enemyCharacterBattle.CharacterAttack(playerCharacterBattle, () =>
-            {
-                ChooseActiveCharacterBattle();
-            });
-            */
         }
         else
         {
@@ -178,7 +148,18 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
-    //testowanie kto wygral
+    //funkcja do wlaczania znacznika na aktywnej postaci i wylaczania na nieaktywnych
+    //polaczycz z ChooseActiveCharacterBattle()
+    private void SetActiveCharacterBattle(CharacterBase characterBattle)
+    {
+        if (activeCharacter != null)
+            activeCharacter.HideSelection();
+
+        activeCharacter = characterBattle;
+        activeCharacter.ShowSelection();
+    }
+
+    //spradzenie kto wygral walke
     private bool TestBattleOver()
     {
         if (playerCharacter.CharacterIsDead())
@@ -193,7 +174,6 @@ public class BattleHandler : MonoBehaviour
             Debug.Log("Player win");
             return true;
         }
-
         return false;
     }
 }

@@ -7,5 +7,4 @@ using UnityEngine;
 public class AnimationSystem : MonoBehaviour
 {
     [SerializeField] private Animator characterAnimator;
-
 }
