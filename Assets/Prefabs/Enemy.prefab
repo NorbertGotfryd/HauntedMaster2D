@@ -52,8 +52,8 @@ MonoBehaviour:
   healhAmountMax: 100
   attackAmount: 0
   defAmount: 5
-  moveToTargetSpeed: 5
-  startingPosition: {x: 0, y: 0, z: 0}
+  initiativeAmountMax: 0
+  moveToTargetSpeed: 10
 --- !u!61 &204432537466477102
 BoxCollider2D:
   m_ObjectHideFlags: 0

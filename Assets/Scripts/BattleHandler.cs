@@ -61,7 +61,11 @@ public class BattleHandler : MonoBehaviour
 
     private void Update()
     {
-        //jak wszystko zacznie dzialac przeniesc do osobnej funkcji
+        PlayerTeamAction();
+    }
+
+    private void PlayerTeamAction()
+    {
         switch (battleState)
         {
             case BattleState.WaitingForPlayer:
@@ -72,18 +76,16 @@ public class BattleHandler : MonoBehaviour
                     battleState = BattleState.Busy;
                     playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(),
                        () =>
-                    {
-                        enemyCharacter.HealthDamageCalculation();
-                        Debug.Log("player.onAttackHit");
-                    },
+                       {
+                           enemyCharacter.HealthDamageCalculation();
+                       },
                        () =>
-                    {
-                        Debug.Log("player.onAttackComplete");
-                        playerCharacter.BackToStartPosition(() => Debug.Log("BackToStartPosition"));
-                        ChooseActiveCharacterBattle();
-                        SetActiveCharacterBattle(enemyCharacter);
-
-                    });
+                       {
+                           playerCharacter.BackToStartPosition(() => {
+                               ChooseActiveCharacterBattle();
+                               SetActiveCharacterBattle(enemyCharacter);
+                           });
+                       });
                 }
                 break;
             case BattleState.Busy:
@@ -114,7 +116,7 @@ public class BattleHandler : MonoBehaviour
     }
 
     //ustawienie aktywnej postaci
-    //przerobic to na liste
+    //przerobic na liste
     private void ChooseActiveCharacterBattle()
     {
         //sprawdzenie czy walka nadal trwa
@@ -131,14 +133,13 @@ public class BattleHandler : MonoBehaviour
             enemyCharacter.CharacterAttack(playerCharacter.GetCharacterPosition(),
             () =>
             {
-                Debug.Log("enemy.onAttackHit");
                 playerCharacter.HealthDamageCalculation();
             },
             () =>
             {
-                Debug.Log("enemy.onAttackComplete");
-                enemyCharacter.BackToStartPosition(() => Debug.Log("BackToStartPosition"));
-                ChooseActiveCharacterBattle();
+                enemyCharacter.BackToStartPosition(() => {
+                    ChooseActiveCharacterBattle();
+                });
             });
         }
         else

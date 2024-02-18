@@ -6,6 +6,9 @@ using UnityEngine;
 //klasa bazowa wspolnych funkcji dla wszystkich postaci
 public abstract class CharacterBase : MonoBehaviour
 {
+    private const float STOP_DISTANCE_TO_TARGET = 1f;
+    private const float STOP_DISTANCE_TO_RETURN = 0.05f;
+
     [Header("Base Stats")]
     [SerializeField] protected CharacterElement characterElement;
     [SerializeField] protected int healhAmountMax;
@@ -14,12 +17,11 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField] protected int initiativeAmountMax;
     [SerializeField] protected int moveToTargetSpeed;
 
-    private bool isPlayerTeam;
+    protected bool isPlayerTeam;
     protected int healhAmountCurrent;
     protected int initiativehAmountCurrent;
-    protected float stopDistanceToTargetPosition = 1f;
 
-    public Vector3 startingPosition; //protected
+    protected Vector3 startingPosition;
     protected Vector3 moveToPosition;
 
     protected CharacterState state;
@@ -33,8 +35,8 @@ public abstract class CharacterBase : MonoBehaviour
     protected Action onAttackComplete;
     protected Action onMoveComplete;
 
-    public event EventHandler OnHealthChange;
-    public event EventHandler OnDeath;
+    public Action OnHealthChange;
+    public Action OnDeath;
 
     //status postaci w czasie walki
     protected enum CharacterState
@@ -73,7 +75,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Update()
     {
-        CharacterBattleState(); //to musi byc na eventach w przyszlosi
+        CharacterBattleState(); //na eventach w przyszlosi przerobic
     }
 
     //zainicjalizowanie postaci na polu walki
@@ -91,7 +93,7 @@ public abstract class CharacterBase : MonoBehaviour
             case CharacterState.Idle:
                 break;
             case CharacterState.MoveToTargetAndAttack:
-                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
+                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > STOP_DISTANCE_TO_TARGET)
                 {
                     transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
@@ -103,7 +105,7 @@ public abstract class CharacterBase : MonoBehaviour
                 }
                 break;
             case CharacterState.MoveToPosition:
-                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
+                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > STOP_DISTANCE_TO_TARGET)
                 {
                     transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
@@ -118,7 +120,7 @@ public abstract class CharacterBase : MonoBehaviour
             case CharacterState.AttackTarget:
                 break;
             case CharacterState.MoveToStartPosition:
-                if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > stopDistanceToTargetPosition)
+                if (Vector3.Distance(startingPosition, GetCharacterPosition()) >= STOP_DISTANCE_TO_RETURN)
                 {
                     transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
                 }
@@ -139,7 +141,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         this.onAttackHit = onAttackHit;
         this.onAttackComplete = onAttackComplete;
-        moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized * moveToTargetSpeed;
+        moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized;
         //animacja doskoku do celu lub przygotowania do ataku
         state = CharacterState.MoveToTargetAndAttack;
     }
@@ -173,25 +175,25 @@ public abstract class CharacterBase : MonoBehaviour
             {"NeutralWind", 1f},
             {"NeutralWater", 1f},
             {"NeutralNeutral", 1f},
-            //Ogien koniunkcja
+            //Ogien
             {"FireNeutral", 1f},
             {"FireFire", 1f},
             {"FireWater", 1.5f},
             {"FireEarth", 2f},
             {"FireWind", 0.5f},
-            //Ziemia koniunkcja
+            //Ziemia
             {"EarthNeutral", 1f},
             {"EarthEarth", 1f},
             {"EarthFire", 0.5f},
             {"EarthWater", 2f},
             {"EarthWind", 1.5f},
-            //Woda koniunkcja
+            //Woda
             {"WaterNeutral", 1f},
             {"WaterWater", 1f},
             {"WaterFire", 1.5f},
             {"WaterEarth", 0.5f},
             {"WaterWind", 2f},
-            //Wiatr koniunkcja
+            //Wiatr
             {"WindNeutral", 1f},
             {"WindWind", 1f},
             {"WindFire", 2f},
@@ -207,23 +209,26 @@ public abstract class CharacterBase : MonoBehaviour
     //funkcja obliczajaca przyjete obrazenia przez postac
     public int Damage(int attackAmount, int defAmount)//, float multiplier)
     {
-        //do obliczen trzeba dodac defAmount
-        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * 0.8f, attackAmount * 1.2f) * (DamageMultiplier("Wind", "Water")));
+        float minDmg = 0.8f;
+        float maxDmg = 1.2f;
+        //do obliczen trzeba dodac defAmount i postac atakuje sama siebie
+        int damageAmount = (int)(UnityEngine.Random.Range(
+            attackAmount * minDmg, attackAmount * maxDmg) * (DamageMultiplier("Wind", "Water"))
+            );
 
         return damageAmount;
     }
 
     //obliczanie pozostalego HP postaci i sprawdza czy posatc zginela
-    //Wywolywac do zadawania obrazen postaciom
+    //wywolywac do zadawania obrazen postaciom
     public void HealthDamageCalculation()
     {
-        //trzeba postawic tutaj staty przeciwnika bo bierze atakowanego
         healhAmountCurrent -= Damage(attackAmount, defAmount);
         if (healhAmountCurrent < 0)
             healhAmountCurrent = 0;
 
         if (OnHealthChange != null)
-            OnHealthChange(this, EventArgs.Empty);
+            OnHealthChange();
 
         if (healhAmountCurrent <= 0)
             CharacterDie();
@@ -235,7 +240,7 @@ public abstract class CharacterBase : MonoBehaviour
     public void CharacterDie()
     {
         if (OnDeath != null)
-            OnDeath(this, EventArgs.Empty);
+            OnDeath();
     }
 
     //ukrycie znacznika aktywnej postaci
