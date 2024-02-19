@@ -72,13 +72,13 @@ public class BattleHandler : MonoBehaviour
                 //tura gracza
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    // Attack
+                    //attack
                     battleState = BattleState.Busy;
-                    playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(),
-                       () =>
-                       {
-                           enemyCharacter.HealthDamageCalculation();
-                       },
+                    playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(), () => {
+
+                        playerCharacter.DamageCalculation(enemyCharacter);
+                        //enemyCharacter.HealthDamageCalculation();
+                    },
                        () =>
                        {
                            playerCharacter.BackToStartPosition(() => {
@@ -129,11 +129,11 @@ public class BattleHandler : MonoBehaviour
             SetActiveCharacterBattle(enemyCharacter);
             battleState = BattleState.Busy;
 
-            //test
+            //test akcji przeciwnika
             enemyCharacter.CharacterAttack(playerCharacter.GetCharacterPosition(),
             () =>
             {
-                playerCharacter.HealthDamageCalculation();
+                //playerCharacter.HealthDamageCalculation();
             },
             () =>
             {

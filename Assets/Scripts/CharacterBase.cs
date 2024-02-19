@@ -17,9 +17,10 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField] protected int initiativeAmountMax;
     [SerializeField] protected int moveToTargetSpeed;
 
-    protected bool isPlayerTeam;
     protected int healhAmountCurrent;
     protected int initiativehAmountCurrent;
+
+    protected bool isPlayerTeam;
 
     protected Vector3 startingPosition;
     protected Vector3 moveToPosition;
@@ -34,9 +35,8 @@ public abstract class CharacterBase : MonoBehaviour
     protected Action onAttackHit;
     protected Action onAttackComplete;
     protected Action onMoveComplete;
-
-    public Action OnHealthChange;
-    public Action OnDeath;
+    protected Action OnHealthChange;
+    protected Action OnDeath;
 
     //status postaci w czasie walki
     protected enum CharacterState
@@ -75,7 +75,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Update()
     {
-        CharacterBattleState(); //na eventach w przyszlosi przerobic
+        CharacterBattleState(); //na eventy przerobic w przyszlosi
     }
 
     //zainicjalizowanie postaci na polu walki
@@ -165,11 +165,12 @@ public abstract class CharacterBase : MonoBehaviour
     }
 
     //funkcja okreslajaca przeliczniki obrazen miedzy zywiolami
-    public float DamageMultiplier(string attackerElement, string defenderElement)
+    //sprawdzic wartosci
+    private float DamageMultiplier(string attackerElement, string defenderElement)
     {
         Dictionary<string, float> attackValues = new Dictionary<string, float>()
         {
-            //Neutralny
+            //Neutral
             {"NeutralFire", 1f},
             {"NeutralEarth", 1f},
             {"NeutralWind", 1f},
@@ -178,7 +179,7 @@ public abstract class CharacterBase : MonoBehaviour
             //Ogien
             {"FireNeutral", 1f},
             {"FireFire", 1f},
-            {"FireWater", 1.5f},
+            {"FireWater", 0.5f},
             {"FireEarth", 2f},
             {"FireWind", 0.5f},
             //Ziemia
@@ -206,15 +207,43 @@ public abstract class CharacterBase : MonoBehaviour
         return atkMultiplier;
     }
 
+    //do naprawy
+    public void DamageCalculation(CharacterBase tagetCharacter)
+    {
+        float minDmg = 0.8f;
+        float maxDmg = 1.2f;
+
+        int damageAmount = (int)((UnityEngine.Random.Range(
+            attackAmount * minDmg, attackAmount * maxDmg) - tagetCharacter.defAmount)
+            * (DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString())));
+
+        Debug.Log("DamageMultiplier real: " + DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
+        Debug.Log("DamageMultiplier test: " + DamageMultiplier("Water", "Fire"));
+
+        tagetCharacter.healhAmountCurrent -= damageAmount;
+        if (healhAmountCurrent < 0)
+            healhAmountCurrent = 0;
+
+        if (OnHealthChange != null)
+            OnHealthChange();
+
+        if (healhAmountCurrent <= 0)
+            CharacterDie();
+
+        Debug.Log(tagetCharacter.name + " HP left: " + tagetCharacter.healhAmountCurrent);
+    }
+
+    /* DMG po staremu
     //funkcja obliczajaca przyjete obrazenia przez postac
     public int Damage(int attackAmount, int defAmount)//, float multiplier)
     {
         float minDmg = 0.8f;
         float maxDmg = 1.2f;
-        //do obliczen trzeba dodac defAmount i postac atakuje sama siebie
+        //do obliczen trzeba dodac defAmount
+        //postac atakuje sama siebie
         int damageAmount = (int)(UnityEngine.Random.Range(
-            attackAmount * minDmg, attackAmount * maxDmg) * (DamageMultiplier("Wind", "Water"))
-            );
+            attackAmount * minDmg, attackAmount * maxDmg) * (DamageMultiplier("Wind", "Water")));
+        Debug.Log(DamageMultiplier("Wind", "Water"));
 
         return damageAmount;
     }
@@ -235,7 +264,8 @@ public abstract class CharacterBase : MonoBehaviour
 
         Debug.Log(gameObject.name + " HP left: " + healhAmountCurrent);
     }
-
+    */
+    
     //zabicie postaci
     public void CharacterDie()
     {
@@ -260,4 +290,6 @@ public abstract class CharacterBase : MonoBehaviour
 
     //zwrocenie pozycji postaci
     public Vector3 GetCharacterPosition() => transform.position;
+
+    public CharacterElement GetCharacterElement() => characterElement;
 }
