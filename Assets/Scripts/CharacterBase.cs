@@ -165,41 +165,40 @@ public abstract class CharacterBase : MonoBehaviour
     }
 
     //funkcja okreslajaca przeliczniki obrazen miedzy zywiolami
-    //sprawdzic wartosci
     private float DamageMultiplier(string attackerElement, string defenderElement)
     {
         Dictionary<string, float> attackValues = new Dictionary<string, float>()
         {
             //Neutral
+            {"NeutralNeutral", 1f},
             {"NeutralFire", 1f},
             {"NeutralEarth", 1f},
-            {"NeutralWind", 1f},
             {"NeutralWater", 1f},
-            {"NeutralNeutral", 1f},
+            {"NeutralWind", 1f},
             //Ogien
             {"FireNeutral", 1f},
             {"FireFire", 1f},
-            {"FireWater", 0.5f},
-            {"FireEarth", 2f},
+            {"FireEarth", 1.5f},
+            {"FireWater", 0.5f}, //do weryfikacji
             {"FireWind", 0.5f},
             //Ziemia
             {"EarthNeutral", 1f},
-            {"EarthEarth", 1f},
             {"EarthFire", 0.5f},
-            {"EarthWater", 2f},
-            {"EarthWind", 1.5f},
+            {"EarthEarth", 1f},
+            {"EarthWater", 1.5f},
+            {"EarthWind", 0.5f}, //do weryfikacji
             //Woda
             {"WaterNeutral", 1f},
-            {"WaterWater", 1f},
-            {"WaterFire", 1.5f},
+            {"WaterFire", 0.5f}, //do weryfikacji
             {"WaterEarth", 0.5f},
-            {"WaterWind", 2f},
+            {"WaterWater", 1f},
+            {"WaterWind", 1.5f},
             //Wiatr
             {"WindNeutral", 1f},
-            {"WindWind", 1f},
-            {"WindFire", 2f},
-            {"WindEarth", 1.5f},
+            {"WindFire", 1.5f},
+            {"WindEarth", 0.5f}, //do weryfikacji
             {"WindWater", 0.5f},
+            {"WindWind", 1f},
         };
         string toDict = attackerElement + defenderElement;
         float atkMultiplier = attackValues[toDict];
@@ -212,10 +211,15 @@ public abstract class CharacterBase : MonoBehaviour
     {
         float minDmg = 0.8f;
         float maxDmg = 1.2f;
+        //formula do weryfikacji
+        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg) 
+            - UnityEngine.Random.Range(tagetCharacter.defAmount / 2, tagetCharacter.defAmount)
+            * DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
 
-        int damageAmount = (int)((UnityEngine.Random.Range(
-            attackAmount * minDmg, attackAmount * maxDmg) - tagetCharacter.defAmount)
-            * (DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString())));
+        int minDmgAmount = 1;
+        //zabezpiecznie przez leczeniem przeciwnika atakiem z za duzym defAmount
+        if (damageAmount < minDmgAmount)
+            damageAmount = minDmgAmount;
 
         Debug.Log("DamageMultiplier real: " + DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
         Debug.Log("DamageMultiplier test: " + DamageMultiplier("Water", "Fire"));
@@ -233,39 +237,6 @@ public abstract class CharacterBase : MonoBehaviour
         Debug.Log(tagetCharacter.name + " HP left: " + tagetCharacter.healhAmountCurrent);
     }
 
-    /* DMG po staremu
-    //funkcja obliczajaca przyjete obrazenia przez postac
-    public int Damage(int attackAmount, int defAmount)//, float multiplier)
-    {
-        float minDmg = 0.8f;
-        float maxDmg = 1.2f;
-        //do obliczen trzeba dodac defAmount
-        //postac atakuje sama siebie
-        int damageAmount = (int)(UnityEngine.Random.Range(
-            attackAmount * minDmg, attackAmount * maxDmg) * (DamageMultiplier("Wind", "Water")));
-        Debug.Log(DamageMultiplier("Wind", "Water"));
-
-        return damageAmount;
-    }
-
-    //obliczanie pozostalego HP postaci i sprawdza czy posatc zginela
-    //wywolywac do zadawania obrazen postaciom
-    public void HealthDamageCalculation()
-    {
-        healhAmountCurrent -= Damage(attackAmount, defAmount);
-        if (healhAmountCurrent < 0)
-            healhAmountCurrent = 0;
-
-        if (OnHealthChange != null)
-            OnHealthChange();
-
-        if (healhAmountCurrent <= 0)
-            CharacterDie();
-
-        Debug.Log(gameObject.name + " HP left: " + healhAmountCurrent);
-    }
-    */
-    
     //zabicie postaci
     public void CharacterDie()
     {
@@ -291,5 +262,6 @@ public abstract class CharacterBase : MonoBehaviour
     //zwrocenie pozycji postaci
     public Vector3 GetCharacterPosition() => transform.position;
 
+    //zwrocenie elementu postaci
     public CharacterElement GetCharacterElement() => characterElement;
 }

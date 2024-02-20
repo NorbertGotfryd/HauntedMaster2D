@@ -51,7 +51,7 @@ MonoBehaviour:
   characterElement: 1
   healhAmountMax: 100
   attackAmount: 0
-  defAmount: 1
+  defAmount: 5
   initiativeAmountMax: 0
   moveToTargetSpeed: 10
 --- !u!61 &204432537466477102
