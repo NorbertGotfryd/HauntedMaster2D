@@ -179,24 +179,24 @@ public abstract class CharacterBase : MonoBehaviour
             {"FireNeutral", 1f},
             {"FireFire", 1f},
             {"FireEarth", 1.5f},
-            {"FireWater", 0.5f}, //do weryfikacji
+            {"FireWater", 0.5f},
             {"FireWind", 0.5f},
             //Ziemia
             {"EarthNeutral", 1f},
             {"EarthFire", 0.5f},
             {"EarthEarth", 1f},
             {"EarthWater", 1.5f},
-            {"EarthWind", 0.5f}, //do weryfikacji
+            {"EarthWind", 0.5f},
             //Woda
             {"WaterNeutral", 1f},
-            {"WaterFire", 0.5f}, //do weryfikacji
+            {"WaterFire", 1.5f},
             {"WaterEarth", 0.5f},
             {"WaterWater", 1f},
             {"WaterWind", 1.5f},
             //Wiatr
             {"WindNeutral", 1f},
             {"WindFire", 1.5f},
-            {"WindEarth", 0.5f}, //do weryfikacji
+            {"WindEarth", 1.5f},
             {"WindWater", 0.5f},
             {"WindWind", 1f},
         };
@@ -209,22 +209,29 @@ public abstract class CharacterBase : MonoBehaviour
     //do naprawy
     public void DamageCalculation(CharacterBase tagetCharacter)
     {
-        float minDmg = 0.8f;
-        float maxDmg = 1.2f;
-        //formula do weryfikacji
-        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg) 
-            - UnityEngine.Random.Range(tagetCharacter.defAmount / 2, tagetCharacter.defAmount)
+        //obliczanie zadanego
+        float minDmg = 1f;
+        float maxDmg = 1f;
+        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg)
             * DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
 
-        int minDmgAmount = 1;
-        //zabezpiecznie przez leczeniem przeciwnika atakiem z za duzym defAmount
-        if (damageAmount < minDmgAmount)
-            damageAmount = minDmgAmount;
+        //zabezpiecznie przez leczeniem przeciwnika atakiem
+        if (damageAmount < 0)
+            damageAmount = 0;
 
-        Debug.Log("DamageMultiplier real: " + DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
-        Debug.Log("DamageMultiplier test: " + DamageMultiplier("Water", "Fire"));
+        //zabezpieczenie przed ujemnym defem
+        if (tagetCharacter.defAmount < 0)
+            tagetCharacter.defAmount = 0;
 
-        tagetCharacter.healhAmountCurrent -= damageAmount;
+        //obliczenia czy obrazenia wchodza w pancerz czy w HP
+        //a jak zrobic dmg ktory przechodzi przez pancerz? do rozwazenie w przyszlosci jak beda skille
+        int armorDamage = Math.Min(tagetCharacter.defAmount, damageAmount);
+        int healthDamage = Math.Min(tagetCharacter.healhAmountCurrent, damageAmount - armorDamage);
+        tagetCharacter.defAmount -= armorDamage;
+        tagetCharacter.healhAmountCurrent -= healthDamage;
+
+        Debug.Log(tagetCharacter.name + "HP: " + tagetCharacter.healhAmountCurrent + " & DEF: " + tagetCharacter.defAmount);
+
         if (healhAmountCurrent < 0)
             healhAmountCurrent = 0;
 
@@ -233,8 +240,6 @@ public abstract class CharacterBase : MonoBehaviour
 
         if (healhAmountCurrent <= 0)
             CharacterDie();
-
-        Debug.Log(tagetCharacter.name + " HP left: " + tagetCharacter.healhAmountCurrent);
     }
 
     //zabicie postaci

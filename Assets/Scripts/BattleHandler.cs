@@ -70,7 +70,7 @@ public class BattleHandler : MonoBehaviour
         {
             case BattleState.WaitingForPlayer:
                 //tura gracza
-                if (Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetKeyDown(KeyCode.Space)) //test
                 {
                     //attack
                     battleState = BattleState.Busy;

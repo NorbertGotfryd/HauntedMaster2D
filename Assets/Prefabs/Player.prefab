@@ -216,9 +216,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eb90188c5c4095439d666d69617ffc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterElement: 2
+  characterElement: 0
   healhAmountMax: 100
-  attackAmount: 15
+  attackAmount: 20
   defAmount: 5
   initiativeAmountMax: 0
   moveToTargetSpeed: 10
