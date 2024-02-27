@@ -1,26 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
+using static UnityEngine.ParticleSystem;
 
 //klasa do zarzadzania przebiegiem walki
 public class BattleHandler : MonoBehaviour
 {
-    public static BattleHandler Instance { get; private set; }
+    public static BattleHandler instance { get; private set; }
 
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
 
-    [SerializeField] private Vector3 playerPos;
-    [SerializeField] private Vector3 enemyPos;
+    [SerializeField] private Transform[] playerSpawnPositions;
+    [SerializeField] private Transform[] enemySpawnPositions;
 
     private BattleState battleState;
 
-    private List<CharacterBase> characterList;
+    private List<CharacterBase> characterList = new List<CharacterBase>();
     private CharacterBase selectedTargetCharacter;
     private CharacterBase activeCharacter;
 
-    private CharacterBase playerCharacter; //w przyszlosci do usuniecia
-    private CharacterBase enemyCharacter; //w przyszlosci do usuniecia
+    private CharacterBase playerCharacter; //w przyszlosci do usuniecia (activeCharacter)
+    private CharacterBase enemyCharacter; //w przyszlosci do usuniecia (activeCharacter)
 
     //status walki
     private enum BattleState
@@ -32,32 +35,39 @@ public class BattleHandler : MonoBehaviour
     //pozycja postaci na polu walki
     public enum CharacterLanePosition
     {
-        Active,
-        TopInactive,
-        MiddleInactive,
-        BottomInactive,
+        First = 0,
+        Second = 1,
+        Third = 2,
+        Fourth = 3,
     }
 
     private void Awake()
     {
-        if (Instance != null)
+        if (instance != null)
         {
-            Debug.LogError("There's more than one BattleHandler!" + transform + " - " + Instance);
+            Debug.LogError("There's more than one BattleHandler!" + transform + " - " + instance);
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        instance = this;
     }
 
     private void Start()
     {
-        playerCharacter = SpawnCharacter(true);
-        enemyCharacter = SpawnCharacter(false);
+        //test spawnu
+        for (int i = 0; i < 3; i++)
+        {
+            SpawnCharacter(true, i);
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            SpawnCharacter(false, i);
+        }
 
         SetActiveCharacterBattle(playerCharacter);
         battleState = BattleState.WaitingForPlayer;
     }
-
 
     private void Update()
     {
@@ -72,12 +82,11 @@ public class BattleHandler : MonoBehaviour
                 //tura gracza
                 if (Input.GetKeyDown(KeyCode.Space)) //test
                 {
-                    //attack
+                    //basic attack
                     battleState = BattleState.Busy;
                     playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(), () => {
 
                         playerCharacter.DamageCalculation(enemyCharacter);
-                        //enemyCharacter.HealthDamageCalculation();
                     },
                        () =>
                        {
@@ -93,19 +102,36 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
+    private void SpawnCharacter(bool isPlayerTeam, int lane)
+    {
+        if (isPlayerTeam)
+        {
+            GameObject characterGameObject = Instantiate(playerPrefab, playerSpawnPositions[lane].position, Quaternion.identity);
+            CharacterBase spawnedCharacter = characterGameObject.GetComponent<CharacterBase>();
+            characterList.Add(spawnedCharacter);
+        }
+        else if (!isPlayerTeam)
+        {
+            GameObject characterGameObject = Instantiate(enemyPrefab, enemySpawnPositions[lane].position, Quaternion.identity);
+            CharacterBase spawnedCharacter = characterGameObject.GetComponent<CharacterBase>();
+            characterList.Add(spawnedCharacter);
+        }
+    }
+
+    /*
     //spawn postaci
-    private CharacterBase SpawnCharacter(bool isPlayer)
+    private CharacterBase SpawnCharacter(bool isPlayer, int lane)
     {
         Vector3 position;
         GameObject character;
         if (isPlayer)
         {
-            position = playerPos;
+            position = playerSpawnPositions[lane].position;
             character = playerPrefab;
         }
         else
         {
-            position = enemyPos;
+            position = enemySpawnPositions[0].position;
             character = enemyPrefab;
         }
 
@@ -114,6 +140,7 @@ public class BattleHandler : MonoBehaviour
 
         return characterBattle;
     }
+    */
 
     //ustawienie aktywnej postaci
     //przerobic na liste
@@ -133,7 +160,7 @@ public class BattleHandler : MonoBehaviour
             enemyCharacter.CharacterAttack(playerCharacter.GetCharacterPosition(),
             () =>
             {
-                //playerCharacter.HealthDamageCalculation();
+
             },
             () =>
             {
@@ -163,16 +190,16 @@ public class BattleHandler : MonoBehaviour
     //spradzenie kto wygral walke
     private bool TestBattleOver()
     {
-        if (playerCharacter.CharacterIsDead())
-        {
-            //enemy win
-            Debug.Log("Enemy win");
-            return true;
-        }
         if (enemyCharacter.CharacterIsDead())
         {
             //player win
             Debug.Log("Player win");
+            return true;
+        }
+        if (playerCharacter.CharacterIsDead())
+        {
+            //enemy win
+            Debug.Log("Enemy win");
             return true;
         }
         return false;
