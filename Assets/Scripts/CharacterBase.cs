@@ -18,7 +18,7 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField] protected int moveToTargetSpeed;
 
     protected int healhAmountCurrent;
-    protected int initiativehAmountCurrent;
+    protected int initiativeAmountCurrent;
 
     protected bool isPlayerTeam;
 
@@ -269,4 +269,10 @@ public abstract class CharacterBase : MonoBehaviour
 
     //zwrocenie elementu postaci
     public CharacterElement GetCharacterElement() => characterElement;
+
+    //zwrocenie maksymalnej wartosci inicjatywy
+    public int GetInitiativeAmountMax() => initiativeAmountMax;
+
+    //zwrocenie maksymalnej wartosci inicjatywy
+    public int GetInitiativeAmountCurrent() => initiativeAmountCurrent;
 }
