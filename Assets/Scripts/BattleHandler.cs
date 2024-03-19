@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using static UnityEngine.ParticleSystem;
 
 //klasa do zarzadzania przebiegiem walki
 public class BattleHandler : MonoBehaviour
@@ -66,7 +63,6 @@ public class BattleHandler : MonoBehaviour
             SpawnCharacter(false, i);
         }
 
-        //hmm...
         SetActiveCharacterBattle(characterList[0]);
         battleState = BattleState.WaitingForPlayer;
     }
