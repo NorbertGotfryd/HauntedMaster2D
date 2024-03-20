@@ -50,9 +50,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterElement: 0
   healhAmountMax: 100
-  attackAmount: 0
+  attackAmount: 15
   defAmount: 5
-  initiativeAmountMax: 0
+  initiativeAmountMax: 100
   moveToTargetSpeed: 10
 --- !u!61 &204432537466477102
 BoxCollider2D:

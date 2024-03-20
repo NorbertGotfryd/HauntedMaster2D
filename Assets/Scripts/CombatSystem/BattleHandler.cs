@@ -10,8 +10,8 @@ public class BattleHandler : MonoBehaviour
 {
     public static BattleHandler instance { get; private set; }
 
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject[] playerPrefabs;
+    [SerializeField] private GameObject[] enemyPrefabs;
 
     [SerializeField] private Transform[] playerSpawnPositions;
     [SerializeField] private Transform[] enemySpawnPositions;
@@ -19,11 +19,9 @@ public class BattleHandler : MonoBehaviour
     private BattleState battleState;
 
     private List<CharacterBase> characterList = new List<CharacterBase>();
-    private CharacterBase selectedTargetCharacter;
+    private CharacterBase targetCharacter;
     private CharacterBase activeCharacter;
-
-    private CharacterBase playerCharacter; //w przyszlosci do usuniecia (activeCharacter)
-    private CharacterBase enemyCharacter; //w przyszlosci do usuniecia (activeCharacter)
+    private CharacterBase nextActiveCharacter;
 
     //status walki
     private enum BattleState
@@ -35,10 +33,10 @@ public class BattleHandler : MonoBehaviour
     //pozycja postaci na polu walki
     public enum CharacterLanePosition
     {
-        First = 0,
-        Second = 1,
-        Third = 2,
-        Fourth = 3,
+        First,
+        Second,
+        Third,
+        Fourth,
     }
 
     private void Awake()
@@ -54,24 +52,36 @@ public class BattleHandler : MonoBehaviour
 
     private void Start()
     {
-        //test spawnu
-        for (int i = 0; i < 3; i++)
+        //characterList[0] -> pierwsza postac gracza
+        //test spawnu gracz
+        for (int i = 0; i < playerSpawnPositions.Length; i++)
         {
             SpawnCharacter(true, i);
         }
 
-        for (int i = 0; i < 4; i++)
+        //characterList[4] -> pierwsza postac przeciwnikow
+        //test spawnu przeciwnicy
+        for (int i = 0; i < enemySpawnPositions.Length; i++)
         {
             SpawnCharacter(false, i);
         }
 
-        SetActiveCharacterBattle(playerCharacter);
+        //hmm...
+        SetActiveCharacterBattle(characterList[0]);
         battleState = BattleState.WaitingForPlayer;
     }
 
     private void Update()
     {
         PlayerTeamAction();
+    }
+
+    //ustawienie listy kolejki postaci wedlug inicjatywy
+    private CharacterBase TurnOrder()
+    {
+
+
+        return nextActiveCharacter;
     }
 
     private void PlayerTeamAction()
@@ -84,15 +94,15 @@ public class BattleHandler : MonoBehaviour
                 {
                     //basic attack
                     battleState = BattleState.Busy;
-                    playerCharacter.CharacterAttack(enemyCharacter.GetCharacterPosition(), () => {
+                    characterList[0].CharacterAttack(characterList[4].GetCharacterPosition(), () => {
 
-                        playerCharacter.DamageCalculation(enemyCharacter);
+                        characterList[0].DamageCalculation(characterList[4]);
                     },
                        () =>
                        {
-                           playerCharacter.BackToStartPosition(() => {
+                           characterList[0].BackToStartPosition(() => {
                                ChooseActiveCharacterBattle();
-                               SetActiveCharacterBattle(enemyCharacter);
+                               SetActiveCharacterBattle(characterList[4]);
                            });
                        });
                 }
@@ -102,23 +112,24 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
+    //polaczyc enum z lane
     private void SpawnCharacter(bool isPlayerTeam, int lane)
     {
         if (isPlayerTeam)
         {
-            GameObject characterGameObject = Instantiate(playerPrefab, playerSpawnPositions[lane].position, Quaternion.identity);
+            GameObject characterGameObject = Instantiate(playerPrefabs[0], playerSpawnPositions[lane].position, Quaternion.identity);
             CharacterBase spawnedCharacter = characterGameObject.GetComponent<CharacterBase>();
             characterList.Add(spawnedCharacter);
         }
         else if (!isPlayerTeam)
         {
-            GameObject characterGameObject = Instantiate(enemyPrefab, enemySpawnPositions[lane].position, Quaternion.identity);
+            GameObject characterGameObject = Instantiate(enemyPrefabs[0], enemySpawnPositions[lane].position, Quaternion.identity);
             CharacterBase spawnedCharacter = characterGameObject.GetComponent<CharacterBase>();
             characterList.Add(spawnedCharacter);
         }
     }
 
-    /*
+    /* stary test spawn, 1 postac na druzyne
     //spawn postaci
     private CharacterBase SpawnCharacter(bool isPlayer, int lane)
     {
@@ -143,7 +154,6 @@ public class BattleHandler : MonoBehaviour
     */
 
     //ustawienie aktywnej postaci
-    //przerobic na liste
     private void ChooseActiveCharacterBattle()
     {
         //sprawdzenie czy walka nadal trwa
@@ -151,33 +161,32 @@ public class BattleHandler : MonoBehaviour
             return;
 
         //ustawienie aktywnej postaci
-        if (activeCharacter == playerCharacter)
+        if (activeCharacter == characterList[0])
         {
-            SetActiveCharacterBattle(enemyCharacter);
+            SetActiveCharacterBattle(characterList[0]);
             battleState = BattleState.Busy;
 
-            //test akcji przeciwnika
-            enemyCharacter.CharacterAttack(playerCharacter.GetCharacterPosition(),
+            //test akcji przeciwnika, zaprogramowac AI
+            characterList[4].CharacterAttack(characterList[0].GetCharacterPosition(),
             () =>
             {
 
             },
             () =>
             {
-                enemyCharacter.BackToStartPosition(() => {
+                characterList[4].BackToStartPosition(() => {
                     ChooseActiveCharacterBattle();
                 });
             });
         }
         else
         {
-            SetActiveCharacterBattle(playerCharacter);
+            SetActiveCharacterBattle(characterList[0]);
             battleState = BattleState.WaitingForPlayer;
         }
     }
 
     //funkcja do wlaczania znacznika na aktywnej postaci i wylaczania na nieaktywnych
-    //polaczycz z ChooseActiveCharacterBattle()
     private void SetActiveCharacterBattle(CharacterBase characterBattle)
     {
         if (activeCharacter != null)
@@ -190,13 +199,13 @@ public class BattleHandler : MonoBehaviour
     //spradzenie kto wygral walke
     private bool TestBattleOver()
     {
-        if (enemyCharacter.CharacterIsDead())
+        if (characterList[4].CharacterIsDead())
         {
             //player win
             Debug.Log("Player win");
             return true;
         }
-        if (playerCharacter.CharacterIsDead())
+        if (characterList[0].CharacterIsDead())
         {
             //enemy win
             Debug.Log("Enemy win");

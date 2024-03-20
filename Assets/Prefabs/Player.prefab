@@ -220,7 +220,7 @@ MonoBehaviour:
   healhAmountMax: 100
   attackAmount: 20
   defAmount: 5
-  initiativeAmountMax: 0
+  initiativeAmountMax: 40
   moveToTargetSpeed: 10
 --- !u!61 &3053114339561406503
 BoxCollider2D:
