@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,10 +16,11 @@ public class BattleHandler : MonoBehaviour
 
     private BattleState battleState;
 
-    private List<CharacterBase> characterList = new List<CharacterBase>();
+    public List<CharacterBase> characterList = new List<CharacterBase>(); //private
+    public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
+    public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
     private CharacterBase targetCharacter;
-    private CharacterBase activeCharacter;
-    private CharacterBase nextActiveCharacter;
+    public CharacterBase activeCharacter; //private
 
     //status walki
     private enum BattleState
@@ -50,7 +52,7 @@ public class BattleHandler : MonoBehaviour
     private void Start()
     {
         //characterList[0] -> pierwsza postac gracza
-        //test spawnu gracz
+        //test spawnu gracz, i = lane
         for (int i = 0; i < playerSpawnPositions.Length; i++)
         {
             SpawnCharacter(true, i);
@@ -63,6 +65,15 @@ public class BattleHandler : MonoBehaviour
             SpawnCharacter(false, i);
         }
 
+        // ustawienie kolejnosci ataku dla postaci
+        for (int i = 0; i < characterList.Count; i++)
+        {
+            characterList[i].SetAttackOrder(i);
+        }
+
+        // sortowanie postaci wedlug kolejnosci ataku (inicjatywa)
+        characterList.Sort((x, y) => x.attackOrder.CompareTo(y.attackOrder));
+
         SetActiveCharacterBattle(characterList[0]);
         battleState = BattleState.WaitingForPlayer;
     }
@@ -72,33 +83,28 @@ public class BattleHandler : MonoBehaviour
         PlayerTeamAction();
     }
 
-    //ustawienie listy kolejki postaci wedlug inicjatywy
-    private CharacterBase TurnOrder()
-    {
-
-
-        return nextActiveCharacter;
-    }
-
+    //test dzialania gracza, przeniesc do CharacterPlayerBase
     private void PlayerTeamAction()
     {
         switch (battleState)
         {
             case BattleState.WaitingForPlayer:
-                //tura gracza
-                if (Input.GetKeyDown(KeyCode.Space)) //test
-                {
-                    //basic attack
-                    battleState = BattleState.Busy;
-                    characterList[0].CharacterAttack(characterList[4].GetCharacterPosition(), () => {
 
-                        characterList[0].DamageCalculation(characterList[4]);
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    targetCharacter = characterList[4];
+
+                    //podstawowy atak
+                    battleState = BattleState.Busy;
+                    activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(), () => {
+
+                        activeCharacter.DamageCalculation(targetCharacter);
                     },
                        () =>
                        {
-                           characterList[0].BackToStartPosition(() => {
+                           activeCharacter.BackToStartPosition(() => {
                                ChooseActiveCharacterBattle();
-                               SetActiveCharacterBattle(characterList[4]);
+                               SetActiveCharacterBattle(activeCharacter);
                            });
                        });
                 }
@@ -109,6 +115,7 @@ public class BattleHandler : MonoBehaviour
     }
 
     //polaczyc enum z lane
+    //osobna lista gracza i przeciwnikow, kolejka na trzeciej liscie polaczonej z obu poprzednich
     private void SpawnCharacter(bool isPlayerTeam, int lane)
     {
         if (isPlayerTeam)
@@ -125,62 +132,52 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
-    /* stary test spawn, 1 postac na druzyne
-    //spawn postaci
-    private CharacterBase SpawnCharacter(bool isPlayer, int lane)
-    {
-        Vector3 position;
-        GameObject character;
-        if (isPlayer)
-        {
-            position = playerSpawnPositions[lane].position;
-            character = playerPrefab;
-        }
-        else
-        {
-            position = enemySpawnPositions[0].position;
-            character = enemyPrefab;
-        }
-
-        GameObject characterGameObject = Instantiate(character, position, Quaternion.identity);
-        CharacterBase characterBattle = characterGameObject.GetComponent<CharacterBase>();
-
-        return characterBattle;
-    }
-    */
 
     //ustawienie aktywnej postaci
-    private void ChooseActiveCharacterBattle()
+    public void ChooseActiveCharacterBattle() //private
     {
         //sprawdzenie czy walka nadal trwa
         if (TestBattleOver())
             return;
 
-        //ustawienie aktywnej postaci
-        if (activeCharacter == characterList[0])
-        {
-            SetActiveCharacterBattle(characterList[0]);
-            battleState = BattleState.Busy;
+        if (activeCharacter == null || characterList.IndexOf(activeCharacter) == characterList.Count - 1)
+            activeCharacter = characterList[0];
+        else
+            activeCharacter = characterList[characterList.IndexOf(activeCharacter) + 1];
 
-            //test akcji przeciwnika, zaprogramowac AI
-            characterList[4].CharacterAttack(characterList[0].GetCharacterPosition(),
+        // sprawdzenie czy postac jest zywa
+        //przeskok na inna "zywa" postac
+        if (activeCharacter.CharacterIsDead())
+            return;
+
+        SetActiveCharacterBattle(activeCharacter);
+
+        if (activeCharacter.CompareTag("Player"))
+            battleState = BattleState.WaitingForPlayer;
+        else
+        {
+            battleState = BattleState.Busy;
+            EnemyTeamAction();
+        }
+    }
+
+    //test logki dzialania przeciwnika
+    public void EnemyTeamAction() //private
+    {
+        targetCharacter = characterList[0];
+        activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(),
             () =>
             {
-
+                activeCharacter.DamageCalculation(targetCharacter);
             },
             () =>
             {
-                characterList[4].BackToStartPosition(() => {
+                activeCharacter.BackToStartPosition(() => {
                     ChooseActiveCharacterBattle();
                 });
             });
-        }
-        else
-        {
-            SetActiveCharacterBattle(characterList[0]);
-            battleState = BattleState.WaitingForPlayer;
-        }
     }
+    //koniec testu
 
     //funkcja do wlaczania znacznika na aktywnej postaci i wylaczania na nieaktywnych
     private void SetActiveCharacterBattle(CharacterBase characterBattle)
@@ -192,7 +189,7 @@ public class BattleHandler : MonoBehaviour
         activeCharacter.ShowSelection();
     }
 
-    //spradzenie kto wygral walke
+    //test spradzenia kto wygral walke
     private bool TestBattleOver()
     {
         if (characterList[4].CharacterIsDead())

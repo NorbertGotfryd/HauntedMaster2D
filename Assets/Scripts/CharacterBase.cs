@@ -38,6 +38,19 @@ public abstract class CharacterBase : MonoBehaviour
     protected Action OnHealthChange;
     protected Action OnDeath;
 
+
+
+    //test
+    // Kolejka atakow postaci
+    public int attackOrder;
+
+    // Funkcja ustawiajaca kolejnosc ataku postaci
+    //inicjatywa?
+    public void SetAttackOrder(int order)
+    {
+        attackOrder = order;
+    }
+
     //status postaci w czasie walki
     protected enum CharacterState
     {
@@ -61,8 +74,6 @@ public abstract class CharacterBase : MonoBehaviour
     {
         animationSystem = FindObjectOfType<AnimationSystem>();
 
-        healhAmountCurrent = healhAmountMax;
-
         selectionVisual = transform.Find("SelectionVisual").gameObject;
         state = CharacterState.Idle;
         HideSelection();
@@ -70,6 +81,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Start()
     {
+        healhAmountCurrent = healhAmountMax;
         startingPosition = transform.position;
     }
 

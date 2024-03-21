@@ -222,6 +222,7 @@ MonoBehaviour:
   defAmount: 5
   initiativeAmountMax: 40
   moveToTargetSpeed: 10
+  attackOrder: 0
 --- !u!61 &3053114339561406503
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -275,7 +276,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1830833531809002096}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
