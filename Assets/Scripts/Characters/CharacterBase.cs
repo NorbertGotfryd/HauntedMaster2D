@@ -32,24 +32,13 @@ public abstract class CharacterBase : MonoBehaviour
     protected GameObject selectionVisual;
     protected AnimationSystem animationSystem;
 
+    protected SkillBase[] skillsBaseArray; //PlayerBase?
+
     protected Action onAttackHit;
     protected Action onAttackComplete;
     protected Action onMoveComplete;
     protected Action OnHealthChange;
     protected Action OnDeath;
-
-
-
-    //test
-    // Kolejka atakow postaci
-    public int attackOrder;
-
-    // Funkcja ustawiajaca kolejnosc ataku postaci
-    //inicjatywa?
-    public void SetAttackOrder(int order)
-    {
-        attackOrder = order;
-    }
 
     //status postaci w czasie walki
     protected enum CharacterState
@@ -73,10 +62,24 @@ public abstract class CharacterBase : MonoBehaviour
     private void Awake()
     {
         animationSystem = FindObjectOfType<AnimationSystem>();
+        skillsBaseArray = GetComponents<SkillBase>();
 
         selectionVisual = transform.Find("SelectionVisual").gameObject;
+
         state = CharacterState.Idle;
         HideSelection();
+    }
+
+    //test
+    // Kolejka atakow postaci
+    public int attackOrder;
+
+    // Funkcja ustawiajaca kolejnosc ataku postaci
+    //inicjatywa?
+
+    public void SetAttackOrder(int order)
+    {
+        attackOrder = order;
     }
 
     private void Start()
@@ -219,30 +222,30 @@ public abstract class CharacterBase : MonoBehaviour
     }
 
     //do naprawy
-    public void DamageCalculation(CharacterBase tagetCharacter)
+    public void DamageCalculation(CharacterBase targetCharacter)
     {
         //obliczanie zadanego
         float minDmg = 1f;
         float maxDmg = 1f;
         int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg)
-            * DamageMultiplier(characterElement.ToString(), tagetCharacter.GetCharacterElement().ToString()));
+            * DamageMultiplier(characterElement.ToString(), targetCharacter.GetCharacterElement().ToString()));
 
         //zabezpiecznie przez leczeniem przeciwnika atakiem
         if (damageAmount < 0)
             damageAmount = 0;
 
         //zabezpieczenie przed ujemnym defem
-        if (tagetCharacter.defAmount < 0)
-            tagetCharacter.defAmount = 0;
+        if (targetCharacter.defAmount < 0)
+            targetCharacter.defAmount = 0;
 
         //obliczenia czy obrazenia wchodza w pancerz czy w HP
         //a jak zrobic dmg ktory przechodzi przez pancerz? do rozwazenie w przyszlosci jak beda skille
-        int armorDamage = Math.Min(tagetCharacter.defAmount, damageAmount);
-        int healthDamage = Math.Min(tagetCharacter.healhAmountCurrent, damageAmount - armorDamage);
-        tagetCharacter.defAmount -= armorDamage;
-        tagetCharacter.healhAmountCurrent -= healthDamage;
+        int armorDamage = Math.Min(targetCharacter.defAmount, damageAmount);
+        int healthDamage = Math.Min(targetCharacter.healhAmountCurrent, damageAmount - armorDamage);
+        targetCharacter.defAmount -= armorDamage;
+        targetCharacter.healhAmountCurrent -= healthDamage;
 
-        Debug.Log(tagetCharacter.name + "HP: " + tagetCharacter.healhAmountCurrent + " & DEF: " + tagetCharacter.defAmount);
+        Debug.Log(targetCharacter.name + "HP: " + targetCharacter.healhAmountCurrent + " & DEF: " + targetCharacter.defAmount);
 
         if (healhAmountCurrent < 0)
             healhAmountCurrent = 0;
@@ -287,4 +290,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     //zwrocenie maksymalnej wartosci inicjatywy
     public int GetInitiativeAmountCurrent() => initiativeAmountCurrent;
+
+    //zwrocenie skilli postaci
+    public SkillBase[] GetSkillsBaseArray() => skillsBaseArray;
 }
