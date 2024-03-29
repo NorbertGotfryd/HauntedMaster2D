@@ -224,7 +224,7 @@ public abstract class CharacterBase : MonoBehaviour
     //do naprawy
     public void DamageCalculation(CharacterBase targetCharacter)
     {
-        //obliczanie zadanego
+        //obliczanie zadanego dmg
         float minDmg = 1f;
         float maxDmg = 1f;
         int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg)
@@ -253,6 +253,7 @@ public abstract class CharacterBase : MonoBehaviour
         if (OnHealthChange != null)
             OnHealthChange();
 
+        //przeniesc
         if (healhAmountCurrent <= 0)
             CharacterDie();
     }

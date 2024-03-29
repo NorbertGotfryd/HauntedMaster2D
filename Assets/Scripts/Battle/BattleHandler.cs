@@ -16,6 +16,11 @@ public class BattleHandler : MonoBehaviour
 
     private BattleState battleState;
 
+    public event EventHandler OnActiveUnitChanged; //private
+
+    //nie dziala
+    public SkillBase skillSelected; //private
+
     public List<CharacterBase> characterList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
@@ -199,6 +204,14 @@ public class BattleHandler : MonoBehaviour
         activeCharacter.ShowSelection();
     }
     */
+
+    //test, nie dziala
+    public void SetSelectedAction(SkillBase skillBase)
+    {
+        skillSelected = skillBase;
+
+        OnActiveUnitChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     //test spradzenia kto wygral walke
     private bool TestBattleOver()

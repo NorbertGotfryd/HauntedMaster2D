@@ -223,7 +223,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterElement: 0
   healhAmountMax: 100
-  attackAmount: 20
+  attackAmount: 1
   defAmount: 5
   initiativeAmountMax: 40
   moveToTargetSpeed: 10

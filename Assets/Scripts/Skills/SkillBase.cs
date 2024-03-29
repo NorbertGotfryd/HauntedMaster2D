@@ -4,5 +4,23 @@ using UnityEngine;
 
 public abstract class SkillBase : MonoBehaviour
 {
-    private bool isActive; //max 4
+    private const int MAX_ACTIVE_SKILLS = 4;
+
+    protected bool isActive;
+
+    [SerializeField] public abstract string GetSkillName();
+    [SerializeField] protected abstract int GetSkillPower();
+    
+    protected SkillElement skillElement;
+
+    protected StatusBase skillStatus;
+
+    protected enum SkillElement
+    {
+        Neutral,
+        Fire,
+        Earth,
+        Water,
+        Wind
+    }
 }

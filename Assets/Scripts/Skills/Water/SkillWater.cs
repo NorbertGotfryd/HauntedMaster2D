@@ -4,5 +4,7 @@ using UnityEngine;
 
 public class SkillWater : SkillBase
 {
+    public override string GetSkillName() => "SkillWater";
 
+    protected override int GetSkillPower() => 5;
 }

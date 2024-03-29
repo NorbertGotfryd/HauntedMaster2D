@@ -4,5 +4,7 @@ using UnityEngine;
 
 public class SkillWind : SkillBase
 {
+    public override string GetSkillName() => "SkillWind";
 
+    protected override int GetSkillPower() => 5;
 }
