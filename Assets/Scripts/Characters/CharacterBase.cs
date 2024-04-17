@@ -44,8 +44,8 @@ public abstract class CharacterBase : MonoBehaviour
     protected enum CharacterState
     {
         Idle,
-        MoveToTargetAndAttack,
-        AttackTarget,
+        MoveToTargetAndDoAction,
+        DoActionOnTarget,
         MoveToStartPosition,
         MoveToPosition,
         Busy,
@@ -74,13 +74,13 @@ public abstract class CharacterBase : MonoBehaviour
     // Kolejka atakow postaci
     public int attackOrder;
 
-    // Funkcja ustawiajaca kolejnosc ataku postaci
+    //funkcja ustawiajaca kolejnosc ataku postaci
     //inicjatywa?
-
     public void SetAttackOrder(int order)
     {
         attackOrder = order;
     }
+    //test koniec
 
     private void Start()
     {
@@ -90,7 +90,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Update()
     {
-        CharacterBattleState(); //na eventy przerobic w przyszlosi
+        CharacterBattleState(); //na eventy przerobic
     }
 
     //zainicjalizowanie postaci na polu walki
@@ -107,7 +107,7 @@ public abstract class CharacterBase : MonoBehaviour
         {
             case CharacterState.Idle:
                 break;
-            case CharacterState.MoveToTargetAndAttack:
+            case CharacterState.MoveToTargetAndDoAction:
                 if (Vector3.Distance(moveToPosition, GetCharacterPosition()) > STOP_DISTANCE_TO_TARGET)
                 {
                     transform.position += (moveToPosition - GetCharacterPosition()) * moveToTargetSpeed * Time.deltaTime;
@@ -115,7 +115,7 @@ public abstract class CharacterBase : MonoBehaviour
                 else //dotarcie do docelowej pozycji
                 {
                     onAttackHit();
-                    state = CharacterState.AttackTarget;
+                    state = CharacterState.DoActionOnTarget;
                     onAttackComplete();
                 }
                 break;
@@ -132,7 +132,7 @@ public abstract class CharacterBase : MonoBehaviour
                     onMoveComplete();
                 }
                 break;
-            case CharacterState.AttackTarget:
+            case CharacterState.DoActionOnTarget:
                 break;
             case CharacterState.MoveToStartPosition:
                 if (Vector3.Distance(startingPosition, GetCharacterPosition()) >= STOP_DISTANCE_TO_RETURN)
@@ -151,6 +151,8 @@ public abstract class CharacterBase : MonoBehaviour
         }
     }
 
+    //Wykonanie akcji
+
     //doskok z atakiem
     public void CharacterAttack(Vector3 targetPosition, Action onAttackHit, Action onAttackComplete)
     {
@@ -158,7 +160,7 @@ public abstract class CharacterBase : MonoBehaviour
         this.onAttackComplete = onAttackComplete;
         moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized;
         //animacja doskoku do celu lub przygotowania do ataku
-        state = CharacterState.MoveToTargetAndAttack;
+        state = CharacterState.MoveToTargetAndDoAction;
     }
 
     //dotarcie do celu, bedzie uzywane do wszystkiego innego co wymaga przemieszczenia postaci poza atakiem

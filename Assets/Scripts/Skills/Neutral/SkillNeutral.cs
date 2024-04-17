@@ -1,10 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SkillNeutral : SkillBase
 {
-    public override string GetSkillName() => "SkillNeutral";
+    public override string GetSkillName() => "Skill Neutral";
 
-    protected override int GetSkillPower() => 5;
+    public override void UseSkill(CharacterBase targetCharacter, Action onMakeAction, Action onActionComplete)
+    {
+        Debug.Log(GetSkillName());
+    }
 }

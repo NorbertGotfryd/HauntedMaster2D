@@ -6,6 +6,6 @@ public class StatusBuff : StatusBase
 {
     public void BuffTest()
     {
-        Debug.Log("Buff on target " + BattleHandler.instance.targetCharacter);
+        Debug.Log("Buff on target " + BattleHandler.instance.GetTargetCharacter());
     }
 }

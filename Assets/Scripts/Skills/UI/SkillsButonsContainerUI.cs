@@ -1,35 +1,37 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class SkillsButonsContainerUI : MonoBehaviour
 {
-    [SerializeField] private GameObject skillButtonPrefab;
-    [SerializeField] private GameObject skillContainerGameObject;
+    [SerializeField] private Transform skillButtonPrefab;
+    [SerializeField] private Transform skillContainerTransform;
 
     private void Start()
     {
-        BattleHandler.instance.OnActiveUnitChanged += BattleHandler_OnSelectedUnitChanged;
-        //CreateSkillButtons();
+        BattleHandler.instance.OnActiveUnitChanged += BattleHandler_OnActiveUnitChanged;
+        CreateSkillButtons();
     }
 
-    private void Update()
+    private void CreateSkillButtons()
     {
-        foreach (Transform skillButtonPrefab in skillContainerGameObject.transform)
+        foreach (Transform skillButtonPrefab in skillContainerTransform)
             Destroy(skillButtonPrefab.gameObject);
 
-        CharacterBase selectedCharacter = BattleHandler.instance.activeCharacter;
+        CharacterBase selectedCharacter = BattleHandler.instance.GetActiveCharacter();
 
         foreach (SkillBase skillBase in selectedCharacter.GetSkillsBaseArray())
         {
-            Transform skillButtonTransform = Instantiate(skillButtonPrefab.transform, skillContainerGameObject.transform);
-            SkillButtonUI skillButtonUI = skillButtonPrefab.GetComponent<SkillButtonUI>();
+            Transform skillButtonTransform = Instantiate(skillButtonPrefab, skillContainerTransform);
+            SkillButtonUI skillButtonUI = skillButtonTransform.GetComponent<SkillButtonUI>();
             skillButtonUI.SetSkillBase(skillBase);
         }
     }
 
-    private void BattleHandler_OnSelectedUnitChanged(object sender, EventArgs e)
+    private void BattleHandler_OnActiveUnitChanged(object sender, EventArgs e)
     {
-        //CreateSkillButtons();
+        CreateSkillButtons();
     }
 }

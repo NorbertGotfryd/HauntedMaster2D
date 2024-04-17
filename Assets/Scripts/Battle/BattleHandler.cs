@@ -19,13 +19,13 @@ public class BattleHandler : MonoBehaviour
     public event EventHandler OnActiveUnitChanged; //private
 
     //nie dziala
-    public SkillBase skillSelected; //private
+    [SerializeField] public SkillBase skillSelected; //private
 
     public List<CharacterBase> characterList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
-    public CharacterBase targetCharacter; //private
-    public CharacterBase activeCharacter; //private
+    private CharacterBase targetCharacter; //private
+    private CharacterBase activeCharacter; //private
 
     //status walki
     private enum BattleState
@@ -159,13 +159,12 @@ public class BattleHandler : MonoBehaviour
 
         activeCharacter.ShowSelection();
 
+        UpdateSkillButtons();
+
         // sprawdzenie czy postac jest zywa
         //przeskok na inna "zywa" postac
         if (activeCharacter.CharacterIsDead())
             return;
-
-        //activeCharacter.ShowSelection();
-        //SetActiveCharacterBattle(activeCharacter);
 
         if (activeCharacter.CompareTag("Player"))
             battleState = BattleState.WaitingForPlayer;
@@ -181,11 +180,11 @@ public class BattleHandler : MonoBehaviour
     {
         targetCharacter = characterList[0];
         activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(),
-            () =>
+                () =>
             {
                 activeCharacter.DamageCalculation(targetCharacter);
             },
-            () =>
+                () =>
             {
                 activeCharacter.BackToStartPosition(() => {
                     ChooseActiveCharacterBattle();
@@ -193,24 +192,27 @@ public class BattleHandler : MonoBehaviour
             });
     }
 
-    /*
-    //funkcja do wlaczania znacznika na aktywnej postaci i wylaczania na nieaktywnych
-    private void SetActiveCharacterBattle(CharacterBase characterBattle)
-    {
-        if (activeCharacter != null)
-            activeCharacter.HideSelection();
-
-        activeCharacter = characterBattle;
-        activeCharacter.ShowSelection();
-    }
-    */
-
     //test, nie dziala
-    public void SetSelectedAction(SkillBase skillBase)
+    public void UpdateSkillButtons()
     {
-        skillSelected = skillBase;
-
         OnActiveUnitChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    //test
+    public void HandleSelectedSkill()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            skillSelected.UseSkill(targetCharacter,
+                () =>
+            {
+                Debug.Log("test");
+            },
+                () =>
+            {
+
+            });
+        }
     }
 
     //test spradzenia kto wygral walke
@@ -230,4 +232,7 @@ public class BattleHandler : MonoBehaviour
         }
         return false;
     }
+
+    public CharacterBase GetTargetCharacter() => targetCharacter;
+    public CharacterBase GetActiveCharacter() => activeCharacter;
 }

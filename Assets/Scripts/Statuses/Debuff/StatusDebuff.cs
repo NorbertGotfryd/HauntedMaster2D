@@ -6,6 +6,6 @@ public class StatusDebuff : StatusBase
 {
     public void DebuffTest()
     {
-        Debug.Log("Debuff on target " + BattleHandler.instance.targetCharacter);
+        Debug.Log("Debuff on target " + BattleHandler.instance.GetTargetCharacter());
     }
 }
