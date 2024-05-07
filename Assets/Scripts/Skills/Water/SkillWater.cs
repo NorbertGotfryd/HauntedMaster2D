@@ -5,10 +5,12 @@ using UnityEngine;
 
 public class SkillWater : SkillBase
 {
-    public override string GetSkillName() => "Skill Water";
-
-    public override void UseSkill(CharacterBase targetCharacter, Action onMakeAction, Action onActionComplete)
+    public override void UseSkill(Action onActionComplete)
     {
-        Debug.Log(GetSkillName());
+        Debug.Log($"Using skill: {GetSkillName()}");
+
+        onActionComplete();
     }
+
+    public override string GetSkillName() => "Skill Water";
 }

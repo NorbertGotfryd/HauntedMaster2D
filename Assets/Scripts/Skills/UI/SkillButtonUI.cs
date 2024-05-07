@@ -10,34 +10,25 @@ public class SkillButtonUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI skillText;
     [SerializeField] private Button skillButton;
 
-    //test
-    [SerializeField] private SkillBase buttonHandler;
-
     private SkillBase skillBase;
 
-    /*
     public void SetSkillBase(SkillBase skillBase)
     {
         this.skillBase = skillBase;
         skillText.text = skillBase.GetSkillName();
 
         skillButton.onClick.AddListener(() => {
-            Debug.Log("test test test");
+            BattleHandler.instance.skillSelected = skillBase;
         });
     }
-    */
 
-    public void SetSkillBase(SkillBase skillBase)
+    public void UseSkill()
     {
-        this.skillBase = skillBase;
-        skillText.text = skillBase.GetSkillName();
-
-        skillButton.onClick.AddListener(() => {
-            skillBase.UseSkill(BattleHandler.instance.GetTargetCharacter(), () => {
-                Debug.Log("Action in progress");
-            }, () => {
-                Debug.Log("Action complete");
+        if (BattleHandler.instance.skillSelected != null)
+        {
+            BattleHandler.instance.skillSelected.UseSkill(() => {
+                Debug.Log("Skill action complete");
             });
-        });
+        }
     }
 }

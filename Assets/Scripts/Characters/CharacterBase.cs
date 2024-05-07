@@ -12,7 +12,7 @@ public abstract class CharacterBase : MonoBehaviour
     [Header("Base Stats")]
     [SerializeField] protected CharacterElement characterElement;
     [SerializeField] protected int healhAmountMax;
-    [SerializeField] protected int attackAmount;
+    //[SerializeField] protected int attackAmount;
     [SerializeField] protected int defAmount;
     [SerializeField] protected int initiativeAmountMax;
     [SerializeField] protected int moveToTargetSpeed;
@@ -33,6 +33,7 @@ public abstract class CharacterBase : MonoBehaviour
     protected AnimationSystem animationSystem;
 
     protected SkillBase[] skillsBaseArray; //PlayerBase?
+    protected SkillBase skillSelected;
 
     protected Action onAttackHit;
     protected Action onAttackComplete;
@@ -61,6 +62,7 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Awake()
     {
+        skillSelected = BattleHandler.instance.skillSelected;
         animationSystem = FindObjectOfType<AnimationSystem>();
         skillsBaseArray = GetComponents<SkillBase>();
 
@@ -226,11 +228,16 @@ public abstract class CharacterBase : MonoBehaviour
     //do naprawy
     public void DamageCalculation(CharacterBase targetCharacter)
     {
+        //if (targetCharacter == null)
+            //return;
+
+        SkillBase.SkillElement attackerElement = BattleHandler.instance.skillSelected.GetSkillElement();
+        int attack = BattleHandler.instance.skillSelected.GetAttackAmount();
         //obliczanie zadanego dmg
         float minDmg = 1f;
         float maxDmg = 1f;
-        int damageAmount = (int)(UnityEngine.Random.Range(attackAmount * minDmg, attackAmount * maxDmg)
-            * DamageMultiplier(characterElement.ToString(), targetCharacter.GetCharacterElement().ToString()));
+        int damageAmount = (int)(UnityEngine.Random.Range(attack * minDmg, attack * maxDmg)
+            * DamageMultiplier(attackerElement.ToString(), targetCharacter.GetCharacterElement().ToString()));
 
         //zabezpiecznie przez leczeniem przeciwnika atakiem
         if (damageAmount < 0)

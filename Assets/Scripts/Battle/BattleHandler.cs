@@ -18,14 +18,14 @@ public class BattleHandler : MonoBehaviour
 
     public event EventHandler OnActiveUnitChanged; //private
 
-    //nie dziala
-    [SerializeField] public SkillBase skillSelected; //private
+    public SkillBase skillSelected; //private
 
     public List<CharacterBase> characterList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
     private CharacterBase targetCharacter; //private
     private CharacterBase activeCharacter; //private
+
 
     //status walki
     private enum BattleState
@@ -106,6 +106,7 @@ public class BattleHandler : MonoBehaviour
 
                     //podstawowy atak
                     battleState = BattleState.Busy;
+
                     activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(), () => {
 
                         activeCharacter.DamageCalculation(targetCharacter);
@@ -198,22 +199,6 @@ public class BattleHandler : MonoBehaviour
         OnActiveUnitChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    //test
-    public void HandleSelectedSkill()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            skillSelected.UseSkill(targetCharacter,
-                () =>
-            {
-                Debug.Log("test");
-            },
-                () =>
-            {
-
-            });
-        }
-    }
 
     //test spradzenia kto wygral walke
     private bool TestBattleOver()

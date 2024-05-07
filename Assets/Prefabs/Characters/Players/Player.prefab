@@ -293,10 +293,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eb90188c5c4095439d666d69617ffc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterElement: 0
+  characterElement: 2
   healhAmountMax: 100
-  attackAmount: 1
-  defAmount: 5
+  defAmount: 0
   initiativeAmountMax: 40
   moveToTargetSpeed: 10
   attackOrder: 0
@@ -312,7 +311,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51b5ea5235839554dae9da9485f1eab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillStatus: {fileID: 0}
+  attackAmount: 10
+  skillElement: 2
 --- !u!114 &-4746820321218708973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -325,7 +325,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a5294110ed64404ca6baf0ef72fb927, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillStatus: {fileID: 0}
+  attackAmount: 10
+  skillElement: 1
 --- !u!114 &-8237348622294420304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +339,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 860782420b8371e4088f544b665686cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillStatus: {fileID: 0}
+  attackAmount: 10
+  skillElement: 0
 --- !u!114 &4387371788237910677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -351,7 +353,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4b1cc7897220614f8e83dc685b440dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillStatus: {fileID: 0}
+  attackAmount: 10
+  skillElement: 3
 --- !u!114 &1059432278723517557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,4 +367,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3463d0629e9e8bb44afa1e1fb9cd86e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillStatus: {fileID: 0}
+  attackAmount: 10
+  skillElement: 4
