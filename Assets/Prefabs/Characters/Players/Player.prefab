@@ -312,7 +312,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackAmount: 10
+  healingAmount: 10
   skillElement: 2
+  skillType: 4
 --- !u!114 &-4746820321218708973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,7 +328,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackAmount: 10
+  healingAmount: 0
   skillElement: 1
+  skillType: 0
 --- !u!114 &-8237348622294420304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,7 +344,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackAmount: 10
+  healingAmount: 0
   skillElement: 0
+  skillType: 0
 --- !u!114 &4387371788237910677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -354,7 +360,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackAmount: 10
+  healingAmount: 10
   skillElement: 3
+  skillType: 1
 --- !u!114 &1059432278723517557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,4 +376,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackAmount: 10
+  healingAmount: 0
   skillElement: 4
+  skillType: 0

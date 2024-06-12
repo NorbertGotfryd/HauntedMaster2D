@@ -23,8 +23,8 @@ public class BattleHandler : MonoBehaviour
     public List<CharacterBase> characterList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
     public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
-    private CharacterBase targetCharacter; //private
-    private CharacterBase activeCharacter; //private
+    public CharacterBase targetCharacter; //private
+    public CharacterBase activeCharacter; //private
 
 
     //status walki
@@ -93,33 +93,38 @@ public class BattleHandler : MonoBehaviour
         PlayerTeamAction();
     }
 
-    //test dzialania gracza, przeniesc do CharacterPlayerBase
+
     private void PlayerTeamAction()
     {
         switch (battleState)
         {
             case BattleState.WaitingForPlayer:
-
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     targetCharacter = characterEnemyList[0];
 
-                    //podstawowy atak
-                    battleState = BattleState.Busy;
+                    if (skillSelected != null && targetCharacter != null)
+                    {
+                        battleState = BattleState.Busy;
 
-                    activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(), () => {
+                        // Use the selected skill on the target character
+                        skillSelected.UseSkill(() =>
+                        {
+                            // Skill action complete callback
+                            Debug.Log("Skill action complete");
 
-                        activeCharacter.DamageCalculation(targetCharacter);
-                    },
-                       () =>
-                       {
-                           activeCharacter.BackToStartPosition(() => {
-                               ChooseActiveCharacterBattle();
-                           });
-                       });
+                            // After using the skill, move the active character back to start position
+                            activeCharacter.BackToStartPosition(() =>
+                            {
+                                battleState = BattleState.WaitingForPlayer;
+                                ChooseActiveCharacterBattle();
+                            });
+                        });
+                    }
                 }
                 break;
             case BattleState.Busy:
+                // Handle busy state if needed
                 break;
         }
     }

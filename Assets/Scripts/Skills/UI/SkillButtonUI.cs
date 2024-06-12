@@ -17,7 +17,8 @@ public class SkillButtonUI : MonoBehaviour
         this.skillBase = skillBase;
         skillText.text = skillBase.GetSkillName();
 
-        skillButton.onClick.AddListener(() => {
+        skillButton.onClick.AddListener(() =>
+        {
             BattleHandler.instance.skillSelected = skillBase;
         });
     }

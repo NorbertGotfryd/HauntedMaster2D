@@ -12,7 +12,6 @@ public abstract class CharacterBase : MonoBehaviour
     [Header("Base Stats")]
     [SerializeField] protected CharacterElement characterElement;
     [SerializeField] protected int healhAmountMax;
-    //[SerializeField] protected int attackAmount;
     [SerializeField] protected int defAmount;
     [SerializeField] protected int initiativeAmountMax;
     [SerializeField] protected int moveToTargetSpeed;
@@ -35,8 +34,8 @@ public abstract class CharacterBase : MonoBehaviour
     protected SkillBase[] skillsBaseArray; //PlayerBase?
     protected SkillBase skillSelected;
 
-    protected Action onAttackHit;
-    protected Action onAttackComplete;
+    protected Action onSkillUse;
+    protected Action onSkillComplete;
     protected Action onMoveComplete;
     protected Action OnHealthChange;
     protected Action OnDeath;
@@ -116,9 +115,9 @@ public abstract class CharacterBase : MonoBehaviour
                 }
                 else //dotarcie do docelowej pozycji
                 {
-                    onAttackHit();
+                    onSkillUse();
                     state = CharacterState.DoActionOnTarget;
-                    onAttackComplete();
+                    onSkillComplete();
                 }
                 break;
             case CharacterState.MoveToPosition:
@@ -153,17 +152,26 @@ public abstract class CharacterBase : MonoBehaviour
         }
     }
 
-    //Wykonanie akcji
-
     //doskok z atakiem
-    public void CharacterAttack(Vector3 targetPosition, Action onAttackHit, Action onAttackComplete)
+    public void CharacterAttack(Vector3 targetPosition, Action onSkillUse, Action onSkillComplete)
     {
-        this.onAttackHit = onAttackHit;
-        this.onAttackComplete = onAttackComplete;
+        this.onSkillUse = onSkillUse;
+        this.onSkillComplete = onSkillComplete;
         moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized;
         //animacja doskoku do celu lub przygotowania do ataku
         state = CharacterState.MoveToTargetAndDoAction;
     }
+
+    //doskok z leczeniem
+    public void CharacterHealing(Vector3 targetPosition, Action onSkillUse, Action onSkillComplete)
+    {
+        this.onSkillUse = onSkillUse;
+        this.onSkillComplete = onSkillComplete;
+        moveToPosition = targetPosition + (GetCharacterPosition() - targetPosition).normalized;
+        //animacja doskoku do celu lub przygotowania do ataku
+        state = CharacterState.MoveToTargetAndDoAction;
+    }
+
 
     //dotarcie do celu, bedzie uzywane do wszystkiego innego co wymaga przemieszczenia postaci poza atakiem
     public void MoveToTargetPosition(Vector3 targetPosition, Action onMoveComplete)
@@ -225,11 +233,10 @@ public abstract class CharacterBase : MonoBehaviour
         return atkMultiplier;
     }
 
-    //do naprawy
     public void DamageCalculation(CharacterBase targetCharacter)
     {
-        //if (targetCharacter == null)
-            //return;
+        if (targetCharacter == null)
+            return;
 
         SkillBase.SkillElement attackerElement = BattleHandler.instance.skillSelected.GetSkillElement();
         int attack = BattleHandler.instance.skillSelected.GetAttackAmount();
@@ -265,6 +272,36 @@ public abstract class CharacterBase : MonoBehaviour
         //przeniesc
         if (healhAmountCurrent <= 0)
             CharacterDie();
+    }
+
+    public void HealingCalculation(CharacterBase targetCharacter)
+    {
+        if (targetCharacter == null)
+            return;
+
+        int heal = BattleHandler.instance.skillSelected.GetHealingAmount();
+        //obliczanie leczenia
+        float minHeal = 1f;
+        float maxHeal = 1f;
+        int healingAmount = (int)(UnityEngine.Random.Range(heal * minHeal, heal * maxHeal)
+            * DamageMultiplier(attackerElement.ToString(), targetCharacter.GetCharacterElement().ToString()));
+
+        //zabezpiecznie przez zadawaniem obrazen leczeniem
+        if (healingAmount < 0)
+            healingAmount = 0;
+
+        int newHealthAmount = targetCharacter.healhAmountCurrent + healingAmount;
+
+        //zabezpiecznie przez hp powyzej max
+        if (newHealthAmount > targetCharacter.healhAmountMax)
+            targetCharacter.healhAmountCurrent = targetCharacter.healhAmountMax;
+        else
+            targetCharacter.healhAmountCurrent = newHealthAmount;
+
+        Debug.Log(targetCharacter.name + "HP: " + targetCharacter.healhAmountCurrent + " & DEF: " + targetCharacter.defAmount);
+
+        if (OnHealthChange != null)
+            OnHealthChange();
     }
 
     //zabicie postaci

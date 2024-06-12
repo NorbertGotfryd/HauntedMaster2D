@@ -1,8 +1,5 @@
 using System;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class SkillsButonsContainerUI : MonoBehaviour
 {
