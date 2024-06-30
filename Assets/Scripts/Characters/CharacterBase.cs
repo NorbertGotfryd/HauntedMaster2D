@@ -75,7 +75,15 @@ public abstract class CharacterBase : MonoBehaviour
 
     private void Update()
     {
+<<<<<<< Updated upstream
         CharacterBattleState(); //na eventy przerobic w przyszlosi
+=======
+        if (CharacterIsDead() == true)
+        {
+            Destroy(gameObject);
+        }
+        CharacterBattleState(); //na eventy przerobic
+>>>>>>> Stashed changes
     }
 
     //zainicjalizowanie postaci na polu walki

@@ -294,3 +294,104 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+<<<<<<< Updated upstream:Assets/Prefabs/Player.prefab
+=======
+--- !u!114 &392925671513724868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5eb90188c5c4095439d666d69617ffc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterElement: 0
+  healhAmountMax: 100
+  defAmount: 0
+  initiativeAmountMax: 40
+  moveToTargetSpeed: 10
+  attackOrder: 0
+--- !u!114 &9004567060841916011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51b5ea5235839554dae9da9485f1eab3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackAmount: 10
+  healingAmount: 10
+  skillElement: 2
+  skillType: 4
+--- !u!114 &-4746820321218708973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5294110ed64404ca6baf0ef72fb927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackAmount: 10
+  healingAmount: 0
+  skillElement: 1
+  skillType: 0
+--- !u!114 &-8237348622294420304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 860782420b8371e4088f544b665686cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackAmount: 100
+  healingAmount: 0
+  skillElement: 0
+  skillType: 0
+--- !u!114 &4387371788237910677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4b1cc7897220614f8e83dc685b440dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackAmount: 10
+  healingAmount: 10
+  skillElement: 3
+  skillType: 1
+--- !u!114 &1059432278723517557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830833531809002096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3463d0629e9e8bb44afa1e1fb9cd86e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackAmount: 10
+  healingAmount: 0
+  skillElement: 4
+  skillType: 0
+>>>>>>> Stashed changes:Assets/Prefabs/Characters/Players/Player.prefab
