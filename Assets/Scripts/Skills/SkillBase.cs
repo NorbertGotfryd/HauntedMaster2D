@@ -12,6 +12,10 @@ public abstract class SkillBase : MonoBehaviour
     protected Action onSkillComplete;
     protected CharacterBase defenderCharacter;
 
+    [SerializeField] protected StatusBase statusEffect;
+    [SerializeField] protected int statusPower;
+    [SerializeField] protected int statusDuration;
+
     [SerializeField] protected SkillElement skillElement;
     [SerializeField] protected SkillType skillType;
 
@@ -30,8 +34,13 @@ public abstract class SkillBase : MonoBehaviour
         HealingSkill,
         AttackingAoe,
         BuffSkill,
-        HealingAoe, // Added HealingAoe
-        SelfBuff    // Added SelfBuff
+        HealingAoe,
+        SelfBuff
+    }
+
+    private void Awake()
+    {
+        character = GetComponent<CharacterBase>();
     }
 
     public void ExecuteSkill(Action onActionComplete)
@@ -139,14 +148,19 @@ public abstract class SkillBase : MonoBehaviour
     {
         Debug.Log($"Using self buff skill: {GetSkillName()}");
 
-        // Self buff status
+        // Self buff
         if (onActionComplete != null)
             onActionComplete();
     }
 
-    private void Awake()
+    protected void ApplyStatusEffect(CharacterBase targetCharacter)
     {
-        character = GetComponent<CharacterBase>();
+        if (statusEffect != null)
+        {
+            var statusInstance = Instantiate(statusEffect);
+            statusInstance.Initialize(statusPower, statusDuration, targetCharacter);
+            targetCharacter.AddStatus(statusInstance);
+        }
     }
 
     public abstract void UseSkill(Action action);

@@ -988,6 +988,8 @@ MonoBehaviour:
   characterList: []
   characterPlayerList: []
   characterEnemyList: []
+  targetCharacter: {fileID: 0}
+  activeCharacter: {fileID: 0}
 --- !u!1 &1895868322
 GameObject:
   m_ObjectHideFlags: 0

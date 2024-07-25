@@ -313,6 +313,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAmount: 10
   healingAmount: 10
+  statusEffect: {fileID: 0}
+  statusPower: 0
+  statusDuration: 0
   skillElement: 2
   skillType: 4
 --- !u!114 &-4746820321218708973
@@ -329,6 +332,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAmount: 10
   healingAmount: 0
+  statusEffect: {fileID: 7849550274567829428, guid: 96c6bb1014623574ba65c7c331b51371, type: 3}
+  statusPower: 5
+  statusDuration: 5
   skillElement: 1
   skillType: 0
 --- !u!114 &-8237348622294420304
@@ -345,6 +351,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAmount: 10
   healingAmount: 0
+  statusEffect: {fileID: 0}
+  statusPower: 0
+  statusDuration: 0
   skillElement: 0
   skillType: 0
 --- !u!114 &4387371788237910677
@@ -361,6 +370,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAmount: 10
   healingAmount: 10
+  statusEffect: {fileID: 0}
+  statusPower: 0
+  statusDuration: 0
   skillElement: 3
   skillType: 1
 --- !u!114 &1059432278723517557
@@ -377,5 +389,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackAmount: 10
   healingAmount: 0
+  statusEffect: {fileID: 0}
+  statusPower: 0
+  statusDuration: 0
   skillElement: 4
   skillType: 0

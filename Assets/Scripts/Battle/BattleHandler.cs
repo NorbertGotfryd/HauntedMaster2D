@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
 using UnityEngine;
 
-//klasa do zarzadzania przebiegiem walki
 public class BattleHandler : MonoBehaviour
 {
     public static BattleHandler instance { get; private set; }
@@ -16,25 +14,25 @@ public class BattleHandler : MonoBehaviour
 
     private BattleState battleState;
 
-    public event EventHandler OnActiveUnitChanged; //private
+    public event EventHandler OnActiveUnitChanged;
 
-    public SkillBase skillSelected; //private
+    public SkillBase skillSelected;
 
-    public List<CharacterBase> characterList = new List<CharacterBase>(); //private
-    public List<CharacterBase> characterPlayerList = new List<CharacterBase>(); //private
-    public List<CharacterBase> characterEnemyList = new List<CharacterBase>(); //private
-    public CharacterBase targetCharacter; //private
-    public CharacterBase activeCharacter; //private
+    public List<CharacterBase> characterList = new List<CharacterBase>();
+    public List<CharacterBase> characterPlayerList = new List<CharacterBase>();
+    public List<CharacterBase> characterEnemyList = new List<CharacterBase>();
+    public CharacterBase targetCharacter;
+    public CharacterBase activeCharacter;
 
+    private int currentActiveCharacterIndex;
+    private int turnCount;
 
-    //status walki
     private enum BattleState
     {
         WaitingForPlayer,
         Busy,
     }
 
-    //pozycja postaci na polu walki
     public enum CharacterLanePosition
     {
         First,
@@ -56,35 +54,30 @@ public class BattleHandler : MonoBehaviour
 
     private void Start()
     {
-        //characterList[0] -> pierwsza postac gracza
-        //test spawnu gracz, i = lane
         for (int i = 0; i < playerSpawnPositions.Length; i++)
         {
             SpawnCharacter(true, i);
         }
 
-        //characterList[4] -> pierwsza postac przeciwnikow
-        //test spawnu przeciwnicy
         for (int i = 0; i < enemySpawnPositions.Length; i++)
         {
             SpawnCharacter(false, i);
         }
 
-        //laczenie list postaci gracza i przeciwnikow w jedna
         characterList.AddRange(characterPlayerList);
         characterList.AddRange(characterEnemyList);
 
-        // ustawienie kolejnosci ataku dla postaci
         for (int i = 0; i < characterList.Count; i++)
         {
             characterList[i].SetAttackOrder(i);
         }
 
-        // sortowanie postaci wedlug kolejnosci ataku (inicjatywa)
         characterList.Sort((x, y) => x.attackOrder.CompareTo(y.attackOrder));
 
-        //SetActiveCharacterBattle(characterList[0]);
-        ChooseActiveCharacterBattle();
+        currentActiveCharacterIndex = 0;
+        turnCount = 0;
+        SetActiveCharacterBattle(characterList[currentActiveCharacterIndex]);
+
         battleState = BattleState.WaitingForPlayer;
     }
 
@@ -93,33 +86,36 @@ public class BattleHandler : MonoBehaviour
         PlayerTeamAction();
     }
 
-
-    private void PlayerTeamAction()
+    public void PlayerTeamAction()
     {
         switch (battleState)
         {
             case BattleState.WaitingForPlayer:
-                if (Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetMouseButtonDown(0))
                 {
-                    targetCharacter = characterEnemyList[0];
-
-                    if (skillSelected != null && targetCharacter != null)
+                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+                    if (hit.collider != null)
                     {
-                        battleState = BattleState.Busy;
-
-                        // Use the selected skill on the target character
-                        skillSelected.UseSkill(() =>
+                        CharacterBase clickedCharacter = hit.collider.GetComponent<CharacterBase>();
+                        if (clickedCharacter != null && characterEnemyList.Contains(clickedCharacter))
                         {
-                            // Skill action complete callback
-                            Debug.Log("Skill action complete");
+                            targetCharacter = clickedCharacter;
 
-                            // After using the skill, move the active character back to start position
-                            activeCharacter.BackToStartPosition(() =>
+                            if (skillSelected != null && targetCharacter != null)
                             {
-                                battleState = BattleState.WaitingForPlayer;
-                                ChooseActiveCharacterBattle();
-                            });
-                        });
+                                battleState = BattleState.Busy;
+
+                                skillSelected.UseSkill(() =>
+                                {
+                                    Debug.Log("Skill action complete");
+                                    activeCharacter.BackToStartPosition(() =>
+                                    {
+                                        battleState = BattleState.WaitingForPlayer;
+                                        ChooseNextCharacterBattle();
+                                    });
+                                });
+                            }
+                        }
                     }
                 }
                 break;
@@ -129,8 +125,59 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
-    //polaczyc enum z lane
-    //osobna lista gracza i przeciwnikow, kolejka na trzeciej liscie polaczonej z obu poprzednich
+    private void ChooseNextCharacterBattle()
+    {
+        do
+        {
+            currentActiveCharacterIndex++;
+            if (currentActiveCharacterIndex >= characterList.Count)
+            {
+                currentActiveCharacterIndex = 0;
+                turnCount++;
+            }
+        } while (characterList[currentActiveCharacterIndex].CharacterIsDead());
+
+        SetActiveCharacterBattle(characterList[currentActiveCharacterIndex]);
+    }
+
+    private void SetActiveCharacterBattle(CharacterBase character)
+    {
+        if (activeCharacter != null)
+            activeCharacter.HideSelection();
+
+        activeCharacter = character;
+        activeCharacter.ShowSelection();
+        UpdateSkillButtons();
+
+        activeCharacter.StartTurn();
+
+        if (activeCharacter.CompareTag("Player"))
+        {
+            battleState = BattleState.WaitingForPlayer;
+        }
+        else
+        {
+            battleState = BattleState.Busy;
+            EnemyTeamAction();
+        }
+    }
+
+    public void EnemyTeamAction()
+    {
+        targetCharacter = characterPlayerList[UnityEngine.Random.Range(0, characterPlayerList.Count)];
+        activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(),
+            () =>
+            {
+                activeCharacter.DamageCalculation(targetCharacter);
+            },
+            () =>
+            {
+                activeCharacter.BackToStartPosition(() => {
+                    ChooseNextCharacterBattle();
+                });
+            });
+    }
+
     private void SpawnCharacter(bool isPlayerTeam, int lane)
     {
         if (isPlayerTeam)
@@ -147,77 +194,21 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
-
-    //ustawienie aktywnej postaci
-    public void ChooseActiveCharacterBattle() //private
-    {
-        //sprawdzenie czy walka nadal trwa
-        //if (TestBattleOver())
-            //return;
-
-        if (activeCharacter != null)
-            activeCharacter.HideSelection();
-
-        if (activeCharacter == null || characterList.IndexOf(activeCharacter) == characterList.Count - 1)
-            activeCharacter = characterList[0];
-        else
-            activeCharacter = characterList[characterList.IndexOf(activeCharacter) + 1];
-
-        activeCharacter.ShowSelection();
-
-        UpdateSkillButtons();
-
-        // sprawdzenie czy postac jest zywa
-        //przeskok na inna "zywa" postac
-        if (activeCharacter.CharacterIsDead())
-            return;
-
-        if (activeCharacter.CompareTag("Player"))
-            battleState = BattleState.WaitingForPlayer;
-        else
-        {
-            battleState = BattleState.Busy;
-            EnemyTeamAction();
-        }
-    }
-
-    //test logki dzialania przeciwnika
-    public void EnemyTeamAction() //private
-    {
-        targetCharacter = characterList[0];
-        activeCharacter.CharacterAttack(targetCharacter.GetCharacterPosition(),
-                () =>
-            {
-                activeCharacter.DamageCalculation(targetCharacter);
-            },
-                () =>
-            {
-                activeCharacter.BackToStartPosition(() => {
-                    ChooseActiveCharacterBattle();
-                });
-            });
-    }
-
-    //test, nie dziala
     public void UpdateSkillButtons()
     {
         OnActiveUnitChanged?.Invoke(this, EventArgs.Empty);
     }
 
-
-    //test spradzenia kto wygral walke
     private bool TestBattleOver()
     {
-        if (characterList[4].CharacterIsDead())
+        if (characterPlayerList.TrueForAll(c => c.CharacterIsDead()))
         {
-            //player win
-            Debug.Log("Player win");
+            Debug.Log("Enemy win");
             return true;
         }
-        if (characterList[0].CharacterIsDead())
+        if (characterEnemyList.TrueForAll(c => c.CharacterIsDead()))
         {
-            //enemy win
-            Debug.Log("Enemy win");
+            Debug.Log("Player win");
             return true;
         }
         return false;
